@@ -18,11 +18,13 @@ const int SCR_HEIGHT = 600;
 bool colored = false;
 int max = 100000;
 int cam = 0;
+int letter=0;
 int point = 0;
 float vertices[100000];
 const float radius = 30.0f;
 float camX = radius;
 float camZ = radius;
+
 struct Point{
   int x;
   int y;
@@ -30,23 +32,30 @@ struct Point{
 };
 int find_pos(struct Point p,struct Point *l,int s){
   int i=0;
-  while(p.x!=l[i].x && p.y!=l[i].y && i<s){
+  while(i<s){
+    //printf("%d\n ",l[i].x);
+    if(p.x==l[i].x){
+      return i;
+    }
     i++;
   }
- return i == s ? -1 : i;
+ return i;
 }
+
 struct Point *positions(){
   struct Point *positions=(struct Point *)malloc(6*sizeof(struct Point));
-  int n[]={-3,0,3};
+  float n[]={-4.5,-1.5,0,1.5,4.5,3};
   for(int i=0;i<6;i++){
-    struct Point p;p.x=n[rand()%3];p.y=n[rand()%3];
-    while(find_pos(p,positions,6)==-1){
-      p.x=n[rand()%3];p.y=n[rand()%3];
+    struct Point p;p.x=n[rand()%(sizeof(n)/sizeof(float))];
+    while(find_pos(p,positions,i+1)!=i+1){
+      p.x=n[rand()%(sizeof(n)/sizeof(int))];
     }
+    printf("%d %d\n",p.x,i);
     positions[i]=p;
   }
   return positions;
 }
+
 float colors[] = {0.2f, 0.3f, 0.3f};
 // Input vertex data, different for all executions of this shader.
 // Output data color, will be interpolated for each fragment.
@@ -76,7 +85,7 @@ void add_letters(float *t,struct Point position,int max)
   while (i < max)
   {
     vertices[point++] = t[i++]+position.x;
-    vertices[point++] = t[i++]+position.y;
+    vertices[point++] = t[i++];
     vertices[point++] = t[i++];
   }
 }
@@ -343,6 +352,8 @@ void processInput(GLFWwindow *window)
   {
     Model = glm::rotate(glm::mat4(1.0f), glm::radians(-10.0f), glm::vec3(0, 1, 0)); //sentido para a esquerda
   }
+
+  //cams
   if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS || cam == 1)
   {
     view = glm::lookAt(glm::vec3(-1, 0, 0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
@@ -372,6 +383,11 @@ void processInput(GLFWwindow *window)
   {
     view = glm::lookAt(glm::vec3(0.0, -1, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
     cam = 6;
+  }
+
+  //select letter
+  if(glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS || letter==1){
+
   }
 }
 
