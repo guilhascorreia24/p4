@@ -30,27 +30,13 @@ struct Point{
   int y;
   int z;
 };
-int find_pos(struct Point p,struct Point *l,int s){
-  int i=0;
-  while(i<s){
-    //printf("%d\n ",l[i].x);
-    if(p.x==l[i].x){
-      return i;
-    }
-    i++;
-  }
- return i;
-}
+
 
 struct Point *positions(){
   struct Point *positions=(struct Point *)malloc(6*sizeof(struct Point));
-  float n[]={-4.5,-1.5,0,1.5,4.5,3};
+  float n[]={-6.5,-3.5,-1.5,1.5,6.5,3.5};
   for(int i=0;i<6;i++){
-    struct Point p;p.x=n[rand()%(sizeof(n)/sizeof(float))];
-    while(find_pos(p,positions,i+1)!=i+1){
-      p.x=n[rand()%(sizeof(n)/sizeof(int))];
-    }
-    printf("%d %d\n",p.x,i);
+    struct Point p;p.x=n[i];
     positions[i]=p;
   }
   return positions;
@@ -148,8 +134,18 @@ int main()
   float *r = letra_rafa();
   max = size_r;
   add_letters(r,position[3],max);
+
+  float *c = letra_bruno();
+  max = size_c;
+  add_letters(c,position[4],max);
   printf("%d\n",point);
   max = point / 3;
+
+
+
+
+
+
   //set_colors(colors, vertices, i);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
@@ -262,7 +258,7 @@ int main()
 
   // Projection matrix : 45� Field of View, 4:3 ratio,
   // display range : 0.1 unit <-> 100 units
-  glm::mat4 Projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.0f, 100.0f);
+  glm::mat4 Projection = glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, 0.0f, 100.0f);
   //glm::perspective(glm::radians(30.0f), 4.0f / 3.0f, 0.1f, 100.0f);
   // View camera matrix
   view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
