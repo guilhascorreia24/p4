@@ -8871,6 +8871,6 @@ float *letter_omega()
         if (k % 3 == 1)
             omega[k] -= 0.03;
     }
-    size_omega=size_of;
+    size_omega=size_of
     return omega;
 }
