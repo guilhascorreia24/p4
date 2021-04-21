@@ -1,4 +1,4 @@
-add_executable(p4 "main.cpp")
+add_executable(p4 "letra_goncalo.cpp")
 target_link_libraries(p4
 LINK_PUBLIC
 glfw
