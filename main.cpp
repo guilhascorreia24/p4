@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stdlib.h>
 #include <math.h>
 #include <iostream>
 #include "points.h"
@@ -17,10 +18,25 @@ const int SCR_HEIGHT = 600;
 bool colored = false;
 int max = 100000;
 int cam = 0;
+int point = 0;
 float vertices[100000];
 const float radius = 30.0f;
 float camX = radius;
 float camZ = radius;
+struct Point{
+  int x;
+  int y;
+  int z;
+};
+struct Point *positions(){
+  struct Point *positions=(struct Point *)malloc(6*sizeof(struct Point));
+  int n[]={-3,0,3};
+  for(int i=0;i<6;i++){
+      positions[i].x=n[rand()%3];
+      positions[i].y=n[rand()%3];
+  }
+  return positions;
+}
 float colors[] = {0.2f, 0.3f, 0.3f};
 // Input vertex data, different for all executions of this shader.
 // Output data color, will be interpolated for each fragment.
@@ -44,6 +60,16 @@ const char *fragmentShaderSource = "#version 330 core\n"
                                    "{\n"
                                    " FragColor = fragmentColor;\n"
                                    "}\n\0";
+void add_letters(float *t,struct Point position,int max)
+{
+  int i = 0;
+  while (i < max)
+  {
+    vertices[point++] = t[i++]+position.x;
+    vertices[point++] = t[i++]+position.y;
+    vertices[point++] = t[i++];
+  }
+}
 
 int main()
 {
@@ -85,16 +111,26 @@ int main()
   // makes 6*2=12 triangles, and 12*3 vertices
   // ------------------------------------------------------------------
   float colors[100000];
-  float *omega=letter_omega();
-  float *g=letra_goncalo();
-  float *psi=letra_psy();
-  float *p=letra_P();
-  float *r=letra_rafa();
-  max=size_of;
-  for(int i=0;i<max;i++){
-    vertices[i]=omega[i];
-  }
-  max=size_omega;
+  struct Point *position=positions();
+  float *omega = letter_omega();
+  max = size_omega;
+  add_letters(omega,position[0],max);
+
+  float *g = letra_goncalo();
+  max = size_g;
+  add_letters(g,position[1],max);
+
+  //float *psi = letra_psy();
+
+  float *p = letra_P();
+  max = size_p;
+  add_letters(p,position[2],max);
+
+  float *r = letra_rafa();
+  max = size_r;
+  add_letters(r,position[3],max);
+  printf("%d\n",point);
+  max = point / 3;
   //set_colors(colors, vertices, i);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
@@ -207,13 +243,13 @@ int main()
 
   // Projection matrix : 45� Field of View, 4:3 ratio,
   // display range : 0.1 unit <-> 100 units
-  glm::mat4 Projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 100.0f);
+  glm::mat4 Projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.0f, 100.0f);
   //glm::perspective(glm::radians(30.0f), 4.0f / 3.0f, 0.1f, 100.0f);
   // View camera matrix
   view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
   // Model matrix : an identity matrix (model will be at the origin)
   Model = glm::mat4();
-  Model = glm::rotate(Model, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  Model = glm::rotate(Model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
   // Our ModelViewProjection : multiplication of our 3 matrices
   // Remember, matrix multiplication is the other way around
   glm::mat4 MVP = Projection * view * Model;
@@ -277,25 +313,56 @@ int main()
 
 void processInput(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
-      glfwSetWindowShouldClose(window, true);
-    }
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        Model = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0, 1, 0)); //sentido horario sobre o eixo X
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        Model = glm::rotate(glm::mat4(1.0f), glm::radians(-10.0f), glm::vec3(0, 1, 0)); //sentido anti-horario sobre o eixo X
-    }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    {
-        Model = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0, 1, 0)); //sentido para a direita
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    {
-        Model = glm::rotate(glm::mat4(1.0f), glm::radians(-10.0f), glm::vec3(0, 1, 0)); //sentido para a esquerda 
-    }
+  if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+  {
+    glfwSetWindowShouldClose(window, true);
+  }
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+  {
+    Model = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0, 1, 0)); //sentido horario sobre o eixo X
+  }
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+  {
+    Model = glm::rotate(glm::mat4(1.0f), glm::radians(-10.0f), glm::vec3(0, 1, 0)); //sentido anti-horario sobre o eixo X
+  }
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+  {
+    Model = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0, 1, 0)); //sentido para a direita
+  }
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+  {
+    Model = glm::rotate(glm::mat4(1.0f), glm::radians(-10.0f), glm::vec3(0, 1, 0)); //sentido para a esquerda
+  }
+  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS || cam == 1)
+  {
+    view = glm::lookAt(glm::vec3(-1, 0, 0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    cam = 1;
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || cam == 2)
+  {
+    view = glm::lookAt(glm::vec3(1, 0, 0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 0.0));
+    cam = 2;
+  }
+  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS || cam == 3)
+  {
+    view = glm::lookAt(glm::vec3(0.0, 0.0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    cam = 3;
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || cam == 4)
+  {
+    view = glm::lookAt(glm::vec3(0.0, 0.0, -1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    cam = 4;
+  }
+  if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS || cam == 5)
+  {
+    view = glm::lookAt(glm::vec3(0.0, 1, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+    cam = 5;
+  }
+  if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS || cam == 6)
+  {
+    view = glm::lookAt(glm::vec3(0.0, -1, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+    cam = 6;
+  }
 }
 
 /* glfw: whenever the window size changed (by OS or user resize) this
