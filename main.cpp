@@ -71,7 +71,7 @@ float get(float t, float xp[])
 
 void letra_rafa()
 {
-  letra_r[] = {
+  float letra_r[] = {
         -0.3f, -0.38f, 0.1f, //C
         -0.17f, -0.36f, 0.1f, //D
         -0.16f, -0.41f, 0.1f, //E
