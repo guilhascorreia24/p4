@@ -18,6 +18,7 @@ int max = 100000;
 int cam = 0;
 int N = 9;
 float vertices[100000];
+float letra_p[3411];
 const float radius = 30.0f;
 float camX = radius;
 float camZ = radius;
@@ -67,8 +68,8 @@ float get(float t, float xp[])
   return result;
 }
 
-void letra_P(){
-  static const float vertices[] = {
+void letra_P() {
+    float letra_p[] = {
       //TROCO
       -0.37f, -0.483f, 0.05f, //J8
       -0.354f, -0.485f, 0.05f, //I
