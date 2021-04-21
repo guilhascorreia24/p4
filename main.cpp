@@ -28,12 +28,22 @@ struct Point{
   int y;
   int z;
 };
+int find_pos(struct Point p,struct Point *l,int s){
+  int i=0;
+  while(p.x!=l[i].x && p.y!=l[i].y && i<s){
+    i++;
+  }
+ return i == s ? -1 : i;
+}
 struct Point *positions(){
   struct Point *positions=(struct Point *)malloc(6*sizeof(struct Point));
   int n[]={-3,0,3};
   for(int i=0;i<6;i++){
-      positions[i].x=n[rand()%3];
-      positions[i].y=n[rand()%3];
+    struct Point p;p.x=n[rand()%3];p.y=n[rand()%3];
+    while(find_pos(p,positions,6)==-1){
+      p.x=n[rand()%3];p.y=n[rand()%3];
+    }
+    positions[i]=p;
   }
   return positions;
 }
