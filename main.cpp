@@ -7,7 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
-void letra_rafa();
 
 // settings
 glm::mat4 view;
@@ -19,11 +18,8 @@ int max = 100000;
 int cam = 0;
 int N = 9;
 float vertices[100000];
-<<<<<<< HEAD
 float letra_r[3663];
-=======
 float letra_p[3411];
->>>>>>> d2e96e4e77bb51cdcb0b00e814bfb4f7db36e8c5
 const float radius = 30.0f;
 float camX = radius;
 float camZ = radius;
