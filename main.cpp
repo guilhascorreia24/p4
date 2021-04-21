@@ -21,7 +21,6 @@ float vertices[100000];
 const float radius = 30.0f;
 float camX = radius;
 float camZ = radius;
-
 float colors[] = {0.2f, 0.3f, 0.3f};
 // Input vertex data, different for all executions of this shader.
 // Output data color, will be interpolated for each fragment.
@@ -45,27 +44,6 @@ const char *fragmentShaderSource = "#version 330 core\n"
                                    "{\n"
                                    " FragColor = fragmentColor;\n"
                                    "}\n\0";
-
-void set_colors(float colors[], float vertices[], int size){
-  float max = 1, min = 0.0;
-  float color = ((max - min) * ((float)rand() / RAND_MAX)) + min;
-  for (int k = 0; k < size; k++)
-  {
-    if (k % 3 == 0)
-    {
-      color = ((max - min) * ((float)rand() / RAND_MAX)) + min;
-    }
-    if (k % 3 == 1)
-    {
-      color = ((max - min) * ((float)rand() / RAND_MAX)) + min;
-    }
-    if (k % 3 == 2)
-    {
-      color = ((max - min) * ((float)rand() / RAND_MAX)) + min;
-    }
-    colors[k] = color;
-  }
-}
 
 int main()
 {
@@ -108,10 +86,15 @@ int main()
   // ------------------------------------------------------------------
   float colors[100000];
   float *omega=letter_omega();
-  printf("size:%d\n",size_omega);
-  for(int i=0;i<size_omega;i++){
+  float *g=letra_goncalo();
+  float *psi=letra_psy();
+  float *p=letra_P();
+  float *r=letra_rafa();
+  max=size_of;
+  for(int i=0;i<max;i++){
     vertices[i]=omega[i];
   }
+  max=size_omega;
   //set_colors(colors, vertices, i);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
@@ -292,14 +275,11 @@ int main()
   return 0;
 }
 
-/* process all input: query GLFW whether relevant keys are pressed/released 
-this frame and react accordingly 
------------------------------------------------------------------------*/
-
 void processInput(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
+      glfwSetWindowShouldClose(window, true);
+    }
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         Model = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0, 1, 0)); //sentido horario sobre o eixo X
@@ -316,15 +296,6 @@ void processInput(GLFWwindow *window)
     {
         Model = glm::rotate(glm::mat4(1.0f), glm::radians(-10.0f), glm::vec3(0, 1, 0)); //sentido para a esquerda 
     }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        
-    }
-    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-    {
-        
-    }
-
 }
 
 /* glfw: whenever the window size changed (by OS or user resize) this
@@ -337,4 +308,3 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
   // retina displays.
   glViewport(0, 0, width, height);
 }
-
