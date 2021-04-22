@@ -15791,7 +15791,7 @@ float *letra_bruno()
 }
 float *resize_letter(float *l,int size,float scale){
     float *resized=(float *)malloc(sizeof(float)*size);
-    printf("size:%d\n",size);
+    //printf("size:%d\n",size);
     for(int i=0;i<size;i++){
         if(i%3<2){
             resized[i]=l[i]*scale;
@@ -15799,6 +15799,6 @@ float *resize_letter(float *l,int size,float scale){
             resized[i]=l[i]*scale;
         }
     }
-    printf("resized\n");
+    //printf("resized\n");
     return resized;
 }

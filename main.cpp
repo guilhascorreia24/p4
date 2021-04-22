@@ -8,9 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window, struct Letter *l);
-void resize(struct Letter *letters, int s);
-void reset(struct Letter *l);
+void processInput(GLFWwindow *window);
+void resize(int s);
+void reset();
 
 // settings
 glm::mat4 view;
@@ -39,7 +39,7 @@ struct Letter
   Point p;
   int n_points;
 };
-//struct Letter *letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
+struct Letter *letters = NULL;
 
 void positions(struct Letter *letter, float *positions_x, float positions_y, int size)
 {
@@ -79,14 +79,14 @@ const char *fragmentShaderSource = "#version 330 core\n"
 void add_letters(struct Letter l)
 {
   int i = 0;
-  printf("begin_point:%d\n",point);
+  //printf("begin_point:%d\n", point);
   while (i < l.n_points)
   {
     vertices[point++] = l.letter[i++] + l.p.x;
     vertices[point++] = l.letter[i++] + l.p.y;
     vertices[point++] = l.letter[i++];
   }
-  printf("end_point:%d\n",point);
+  //printf("end_point:%d\n", point);
 }
 
 int main()
@@ -107,7 +107,6 @@ int main()
   // --------------------
   GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "p3", NULL,
                                         NULL);
-
   if (window == NULL)
   {
     std::cout << "Failed to create GLFW window" << std::endl;
@@ -136,28 +135,29 @@ int main()
 
   letter[0].letter = letra_psy();
   letter[0].n_points = size_psi;
-  printf("psi:%d\n", letter[0].n_points);
+  //printf("psi:%d\n", letter[0].n_points);
 
   letter[1].letter = letter_omega();
   letter[1].n_points = size_omega;
-  printf("omega:%d\n", letter[1].n_points);
+  //printf("omega:%d\n", letter[1].n_points);
 
   letter[2].letter = letra_goncalo();
   letter[2].n_points = size_g;
-  printf("g:%d\n", letter[2].n_points);
+  //printf("g:%d\n", letter[2].n_points);
 
   letter[3].letter = letra_P();
   letter[3].n_points = size_p;
-  printf("p:%d\n", letter[3].n_points);
+  //printf("p:%d\n", letter[3].n_points);
 
   letter[4].letter = letra_rafa();
   letter[4].n_points = size_r;
-  printf("r:%d\n", letter[4].n_points);
+  //printf("r:%d\n", letter[4].n_points);
 
   letter[5].letter = letra_bruno();
   letter[5].n_points = size_c;
-  printf("c:%d\n", letter[5].n_points);
-  reset(letter);
+  //printf("c:%d\n", letter[5].n_points);
+  letters=letter;
+  reset();
 
   printf("total:%d\n", point);
   max = point / 3;
@@ -245,7 +245,7 @@ int main()
     // input
     // -----
     unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
-    processInput(window, letter);
+    processInput(window);
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
@@ -341,7 +341,7 @@ int main()
   return 0;
 }
 
-void processInput(GLFWwindow *window, struct Letter *l)
+void processInput(GLFWwindow *window)
 {
   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
   {
@@ -400,37 +400,37 @@ void processInput(GLFWwindow *window, struct Letter *l)
   if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
   {
     letter = 0;
-    resize(l, letter);
+    resize(letter);
   }
   if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
   {
     letter = 1;
-    resize(l, letter);
+    resize(letter);
   }
   if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
   {
     letter = 2;
-    resize(l, letter);
+    resize(letter);
   }
   if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
   {
     letter = 3;
-    resize(l, letter);
+    resize(letter);
   }
   if (glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS)
   {
     letter = 4;
-    resize(l, letter);
+    resize(letter);
   }
   if (glfwGetKey(window, GLFW_KEY_F6) == GLFW_PRESS)
   {
     letter = 5;
-    resize(l, letter);
+    resize(letter);
   }
   if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
   {
     letter = -1;
-    reset(l);
+    reset();
   }
 }
 
@@ -445,7 +445,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
   glViewport(0, 0, width, height);
 }
 
-void resize(struct Letter *l, int s)
+void resize(int s)
 {
   struct Letter *under = (struct Letter *)malloc(5 * sizeof(struct Letter));
   struct Letter highlight;
@@ -459,14 +459,14 @@ void resize(struct Letter *l, int s)
   {
     if (i != s)
     {
-      under[und].letter = resize_letter(l[i].letter, l[i].n_points, 0.5);
-      under[und].n_points = l[i].n_points;
+      under[und].letter = resize_letter(letters[i].letter, letters[i].n_points, 0.5);
+      under[und].n_points = letters[i].n_points;
       und++;
     }
     else
     {
-      highlight.letter = resize_letter(l[i].letter, l[i].n_points, 4);
-      highlight.n_points = l[i].n_points;
+      highlight.letter = resize_letter(letters[i].letter, letters[i].n_points, 4);
+      highlight.n_points = letters[i].n_points;
     }
   }
   printf("clear vertices\n");
@@ -479,13 +479,13 @@ void resize(struct Letter *l, int s)
   add_letters(highlight);
   max = point / 3;
 }
-void reset(struct Letter *letter)
+void reset()
 {
   memset(vertices, 0, point * sizeof(float));
   point = 0;
   for (int i = 0; i < 6; i++)
   {
-    add_letters(letter[i]);
+    add_letters(letters[i]);
   }
-  max = (point-1) / 3;
+  max = (point - 1) / 3;
 }
