@@ -8,8 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window);
-void resize_letters(struct Letter *letters,int s);
+void processInput(GLFWwindow *window, struct Letter *l);
+void resize(struct Letter *letters, int s);
+void reset(struct Letter *l);
 
 // settings
 glm::mat4 view;
@@ -19,7 +20,7 @@ const int SCR_HEIGHT = 600;
 bool colored = false;
 int max = 100000;
 int cam = 0;
-int letter = 0;
+int letter = -1;
 int point = 0;
 float vertices[100000];
 const float radius = 30.0f;
@@ -38,14 +39,16 @@ struct Letter
   Point p;
   int n_points;
 };
+//struct Letter *letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
 
-void positions(struct Letter *letter)
+void positions(struct Letter *letter, float *positions_x, float positions_y, int size)
 {
-  float n[] = {-5.5, -3.2, -0.5, 1.5, 5.5, 3.6};
-  for (int i = 0; i < 6; i++)
+  //float n[] = {-5.5, -3.2, -0.5, 1.5, 5.5, 3.6};
+  for (int i = 0; i < size; i++)
   {
     struct Point p;
-    p.x = n[i];
+    p.x = positions_x[i];
+    p.y = positions_y;
     letter[i].p = p;
   }
 }
@@ -76,12 +79,14 @@ const char *fragmentShaderSource = "#version 330 core\n"
 void add_letters(struct Letter l)
 {
   int i = 0;
+  printf("begin_point:%d\n",point);
   while (i < l.n_points)
   {
     vertices[point++] = l.letter[i++] + l.p.x;
-    vertices[point++] = l.letter[i++];
+    vertices[point++] = l.letter[i++] + l.p.y;
     vertices[point++] = l.letter[i++];
   }
+  printf("end_point:%d\n",point);
 }
 
 int main()
@@ -124,44 +129,37 @@ int main()
   // makes 6*2=12 triangles, and 12*3 vertices
   // ------------------------------------------------------------------
   float colors[100000];
-  
-  
+
   struct Letter *letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
-  positions(letter);
-  //printf("aqui\n");
+  float n[] = {-5.5, -3.2, -0.5, 1.5, 5.5, 3.6};
+  positions(letter, n, 0, 6);
+
   letter[0].letter = letra_psy();
   letter[0].n_points = size_psi;
-  add_letters(letter[0]);
-  printf("aqui2\n");
+  printf("psi:%d\n", letter[0].n_points);
 
   letter[1].letter = letter_omega();
-  //printf("array\n");
   letter[1].n_points = size_omega;
-  //printf("szie\n");
-  add_letters(letter[1]);
-  printf("aqui3\n");
+  printf("omega:%d\n", letter[1].n_points);
 
   letter[2].letter = letra_goncalo();
   letter[2].n_points = size_g;
-  add_letters(letter[2]);
-  printf("aqui4\n");
+  printf("g:%d\n", letter[2].n_points);
 
   letter[3].letter = letra_P();
   letter[3].n_points = size_p;
-  add_letters(letter[3]);
-  printf("aqui5\n");
+  printf("p:%d\n", letter[3].n_points);
 
   letter[4].letter = letra_rafa();
   letter[4].n_points = size_r;
-  add_letters(letter[4]);
-  printf("aqui6\n");
+  printf("r:%d\n", letter[4].n_points);
 
   letter[5].letter = letra_bruno();
   letter[5].n_points = size_c;
-  add_letters(letter[5]);
-  printf("aqui7\n");
+  printf("c:%d\n", letter[5].n_points);
+  reset(letter);
 
-  printf("%d\n", point);
+  printf("total:%d\n", point);
   max = point / 3;
 
   //set_colors(colors, vertices, i);
@@ -170,57 +168,8 @@ int main()
   //max = 36 / 3;
   //printf("%d\n",max);
   unsigned int VAO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  //------------------------------------------------------------
   unsigned int VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
   unsigned int EBO;
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-  // 1rst attribute buffer : vertices
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glVertexAttribPointer(
-      0,        // attribute. No particular reason for 0, but
-                // must match the layout in the shader.
-      3,        // size
-      GL_FLOAT, // type
-      GL_FALSE, // normalized?
-      0,        // stride
-      (void *)0 // array buffer offset
-  );
-
-  // 2nd attribute buffer : colors
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, EBO);
-  glVertexAttribPointer(
-      1,        // attribute. No particular reason for 1, but
-                // must match the layout in the shader.
-      3,        // size
-      GL_FLOAT, // type
-      GL_FALSE, // normalized?
-      0,        // stride
-      (void *)0 // array buffer offset
-  );
-
-  /* note that this is allowed, the call to glVertexAttribPointer 
-       registered VBO as the vertex attribute's bound vertex buffer 
-       object so afterwards we can safely unbind*/
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  /* You can unbind the VAO afterwards so other VAO calls won't 
-       accidentally modify this VAO, but this rarely happens. Modifying 
-       other VAOs requires a call to glBindVertexArray anyways so we 
-       generally don't unbind VAOs (nor VBOs) when it's not directly 
-       necessary.*/
-  glBindVertexArray(0);
-
   // uncomment this call to draw in wireframe polygons.
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -276,12 +225,12 @@ int main()
 
   // Projection matrix : 45� Field of View, 4:3 ratio,
   // display range : 0.1 unit <-> 100 units
-  glm::mat4 Projection = glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, 0.0f, 100.0f);
-  //glm::perspective(glm::radians(30.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+  glm::mat4 Projection = glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f);
+  //glm::mat4 Projection=glm::perspective(glm::radians(90.0f), 8.0f , 1.0f, 100.0f);
   // View camera matrix
   view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
   // Model matrix : an identity matrix (model will be at the origin)
-  Model = glm::rotate(Model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  Model = glm::rotate(Model, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
   // Our ModelViewProjection : multiplication of our 3 matrices
   // Remember, matrix multiplication is the other way around
   glm::mat4 MVP = Projection * view * Model;
@@ -296,7 +245,56 @@ int main()
     // input
     // -----
     unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
-    processInput(window);
+    processInput(window, letter);
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    //------------------------------------------------------------
+
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+    // 1rst attribute buffer : vertices
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glVertexAttribPointer(
+        0,        // attribute. No particular reason for 0, but
+                  // must match the layout in the shader.
+        3,        // size
+        GL_FLOAT, // type
+        GL_FALSE, // normalized?
+        0,        // stride
+        (void *)0 // array buffer offset
+    );
+
+    // 2nd attribute buffer : colors
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, EBO);
+    glVertexAttribPointer(
+        1,        // attribute. No particular reason for 1, but
+                  // must match the layout in the shader.
+        3,        // size
+        GL_FLOAT, // type
+        GL_FALSE, // normalized?
+        0,        // stride
+        (void *)0 // array buffer offset
+    );
+
+    /* note that this is allowed, the call to glVertexAttribPointer 
+       registered VBO as the vertex attribute's bound vertex buffer 
+       object so afterwards we can safely unbind*/
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    /* You can unbind the VAO afterwards so other VAO calls won't 
+       accidentally modify this VAO, but this rarely happens. Modifying 
+       other VAOs requires a call to glBindVertexArray anyways so we 
+       generally don't unbind VAOs (nor VBOs) when it's not directly 
+       necessary.*/
+    glBindVertexArray(0);
     glm::mat4 MVP = Projection * view * Model;
     // render
     // ------
@@ -343,7 +341,7 @@ int main()
   return 0;
 }
 
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window, struct Letter *l)
 {
   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
   {
@@ -399,29 +397,40 @@ void processInput(GLFWwindow *window)
   }
 
   //select letter
-  if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS || letter == 1)
+  if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
   {
-    letter=1;
+    letter = 0;
+    resize(l, letter);
   }
-  if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS || letter == 2)
+  if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
   {
-    letter=2;
+    letter = 1;
+    resize(l, letter);
   }
-    if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS || letter == 3)
+  if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
   {
-    letter=3;
+    letter = 2;
+    resize(l, letter);
   }
-    if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS || letter == 4)
+  if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
   {
-    letter=3;
+    letter = 3;
+    resize(l, letter);
   }
-    if (glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS || letter == 5)
+  if (glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS)
   {
-    letter=3;
+    letter = 4;
+    resize(l, letter);
   }
-    if (glfwGetKey(window, GLFW_KEY_F6) == GLFW_PRESS || letter == 6)
+  if (glfwGetKey(window, GLFW_KEY_F6) == GLFW_PRESS)
   {
-    letter=3;
+    letter = 5;
+    resize(l, letter);
+  }
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+  {
+    letter = -1;
+    reset(l);
   }
 }
 
@@ -436,10 +445,47 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
   glViewport(0, 0, width, height);
 }
 
-/*void resize(struct Letter *l,int s){
-  for(int i=0;i<6;i++){
-    if(i!=s){
+void resize(struct Letter *l, int s)
+{
+  struct Letter *under = (struct Letter *)malloc(5 * sizeof(struct Letter));
+  struct Letter highlight;
 
+  float n[] = {-3.5, -1.7, -0, 1.7, 3.5};
+  positions(under, n, -5, 5);
+  highlight.p.x = 0;
+  highlight.p.y = 1;
+  int und = 0;
+  for (int i = 0; i < 6; i++)
+  {
+    if (i != s)
+    {
+      under[und].letter = resize_letter(l[i].letter, l[i].n_points, 0.5);
+      under[und].n_points = l[i].n_points;
+      und++;
+    }
+    else
+    {
+      highlight.letter = resize_letter(l[i].letter, l[i].n_points, 4);
+      highlight.n_points = l[i].n_points;
     }
   }
-}*/
+  printf("clear vertices\n");
+  memset(vertices, 0, point * sizeof(float));
+  point = 0;
+  for (int i = 0; i < 5; i++)
+  {
+    add_letters(under[i]);
+  }
+  add_letters(highlight);
+  max = point / 3;
+}
+void reset(struct Letter *letter)
+{
+  memset(vertices, 0, point * sizeof(float));
+  point = 0;
+  for (int i = 0; i < 6; i++)
+  {
+    add_letters(letter[i]);
+  }
+  max = (point-1) / 3;
+}

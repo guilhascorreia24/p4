@@ -15354,14 +15354,14 @@ float *letra_goncalo()
 float *letra_rafa()
 {
     float scale = 1.45;
-    for (int i = 0; i < sizeof(letra_r); i++)
+    for (int i = 0; i < sizeof(letra_r)/sizeof(float); i++)
     {
         if (i % 3 < 2)
         {
             letra_r[i] = letra_r[i] * 1.45;
         }
     }
-    size_r = 3662;
+    size_r = sizeof(letra_r)/sizeof(float);
     return letra_r;
 }
 
@@ -15379,7 +15379,7 @@ float *letra_P()
         }
         colors[i] = r;
     }
-    size_p = 3410;
+    size_p = sizeof(letra_p)/sizeof(float);
     return letra_p;
 }
 
@@ -15391,7 +15391,7 @@ float *letra_psy()
         letra_psi[i * 3 + 0] = -(letra_psi[i * 3 + 0] - 37.0f) / 30.0f;
         letra_psi[i * 3 + 1] = -(letra_psi[i * 3 + 1] - 32.0f) / 30.0f;
     }
-    size_psi = sizeof(letra_psi) / sizeof(float);
+    size_psi = totalVertices*3;
     return letra_psi;
 }
 
@@ -15789,4 +15789,16 @@ float *letra_bruno()
     }
     return letra_c;
 }
-
+float *resize_letter(float *l,int size,float scale){
+    float *resized=(float *)malloc(sizeof(float)*size);
+    printf("size:%d\n",size);
+    for(int i=0;i<size;i++){
+        if(i%3<2){
+            resized[i]=l[i]*scale;
+        }else{
+            resized[i]=l[i]*scale;
+        }
+    }
+    printf("resized\n");
+    return resized;
+}
