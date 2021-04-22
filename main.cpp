@@ -9,37 +9,45 @@
 #include <glm/gtc/type_ptr.hpp>
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
+void resize_letters(struct Letter *letters,int s);
 
 // settings
 glm::mat4 view;
-glm::mat4 Model;
+glm::mat4 Model = glm::mat4(1.0f);
 const int SCR_WIDTH = 900;
 const int SCR_HEIGHT = 600;
 bool colored = false;
 int max = 100000;
 int cam = 0;
-int letter=0;
+int letter = 0;
 int point = 0;
 float vertices[100000];
 const float radius = 30.0f;
 float camX = radius;
 float camZ = radius;
 
-struct Point{
-  int x;
-  int y;
-  int z;
+struct Point
+{
+  float x;
+  float y;
+  float z;
+};
+struct Letter
+{
+  float *letter;
+  Point p;
+  int n_points;
 };
 
-
-struct Point *positions(){
-  struct Point *positions=(struct Point *)malloc(6*sizeof(struct Point));
-  float n[]={-6.5,-3.5,-1.5,1.5,6.5,3.5};
-  for(int i=0;i<6;i++){
-    struct Point p;p.x=n[i];
-    positions[i]=p;
+void positions(struct Letter *letter)
+{
+  float n[] = {-5.5, -3.2, -0.5, 1.5, 5.5, 3.6};
+  for (int i = 0; i < 6; i++)
+  {
+    struct Point p;
+    p.x = n[i];
+    letter[i].p = p;
   }
-  return positions;
 }
 
 float colors[] = {0.2f, 0.3f, 0.3f};
@@ -65,14 +73,14 @@ const char *fragmentShaderSource = "#version 330 core\n"
                                    "{\n"
                                    " FragColor = fragmentColor;\n"
                                    "}\n\0";
-void add_letters(float *t,struct Point position,int max)
+void add_letters(struct Letter l)
 {
   int i = 0;
-  while (i < max)
+  while (i < l.n_points)
   {
-    vertices[point++] = t[i++]+position.x;
-    vertices[point++] = t[i++];
-    vertices[point++] = t[i++];
+    vertices[point++] = l.letter[i++] + l.p.x;
+    vertices[point++] = l.letter[i++];
+    vertices[point++] = l.letter[i++];
   }
 }
 
@@ -116,35 +124,45 @@ int main()
   // makes 6*2=12 triangles, and 12*3 vertices
   // ------------------------------------------------------------------
   float colors[100000];
-  struct Point *position=positions();
-  float *omega = letter_omega();
-  max = size_omega;
-  add_letters(omega,position[0],max);
+  
+  
+  struct Letter *letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
+  positions(letter);
+  //printf("aqui\n");
+  letter[0].letter = letra_psy();
+  letter[0].n_points = size_psi;
+  add_letters(letter[0]);
+  printf("aqui2\n");
 
-  float *g = letra_goncalo();
-  max = size_g;
-  add_letters(g,position[1],max);
+  letter[1].letter = letter_omega();
+  //printf("array\n");
+  letter[1].n_points = size_omega;
+  //printf("szie\n");
+  add_letters(letter[1]);
+  printf("aqui3\n");
 
-  //float *psi = letra_psy();
+  letter[2].letter = letra_goncalo();
+  letter[2].n_points = size_g;
+  add_letters(letter[2]);
+  printf("aqui4\n");
 
-  float *p = letra_P();
-  max = size_p;
-  add_letters(p,position[2],max);
+  letter[3].letter = letra_P();
+  letter[3].n_points = size_p;
+  add_letters(letter[3]);
+  printf("aqui5\n");
 
-  float *r = letra_rafa();
-  max = size_r;
-  add_letters(r,position[3],max);
+  letter[4].letter = letra_rafa();
+  letter[4].n_points = size_r;
+  add_letters(letter[4]);
+  printf("aqui6\n");
 
-  float *c = letra_bruno();
-  max = size_c;
-  add_letters(c,position[4],max);
-  printf("%d\n",point);
+  letter[5].letter = letra_bruno();
+  letter[5].n_points = size_c;
+  add_letters(letter[5]);
+  printf("aqui7\n");
+
+  printf("%d\n", point);
   max = point / 3;
-
-
-
-
-
 
   //set_colors(colors, vertices, i);
   // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -263,7 +281,6 @@ int main()
   // View camera matrix
   view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
   // Model matrix : an identity matrix (model will be at the origin)
-  Model = glm::mat4();
   Model = glm::rotate(Model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
   // Our ModelViewProjection : multiplication of our 3 matrices
   // Remember, matrix multiplication is the other way around
@@ -382,8 +399,29 @@ void processInput(GLFWwindow *window)
   }
 
   //select letter
-  if(glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS || letter==1){
-
+  if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS || letter == 1)
+  {
+    letter=1;
+  }
+  if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS || letter == 2)
+  {
+    letter=2;
+  }
+    if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS || letter == 3)
+  {
+    letter=3;
+  }
+    if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS || letter == 4)
+  {
+    letter=3;
+  }
+    if (glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS || letter == 5)
+  {
+    letter=3;
+  }
+    if (glfwGetKey(window, GLFW_KEY_F6) == GLFW_PRESS || letter == 6)
+  {
+    letter=3;
   }
 }
 
@@ -397,3 +435,11 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
   // retina displays.
   glViewport(0, 0, width, height);
 }
+
+/*void resize(struct Letter *l,int s){
+  for(int i=0;i<6;i++){
+    if(i!=s){
+
+    }
+  }
+}*/
