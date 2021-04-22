@@ -22,11 +22,23 @@ int max = 100000;
 int cam = 0;
 int letter = -1;
 int point = 0;
+int point_color = 0;
 float vertices[100000];
+float color[100000];
 const float radius = 30.0f;
 float camX = radius;
 float camZ = radius;
-
+const float selection[] = {
+    0.5f, -4.2f, 0.0f,
+    -0.5f, -5.7f, 0.0f,
+    0.5f, -5.7f, 0.0f,
+    -0.5f, -4.2f, 0.0f,
+    -0.5f, -5.7f, 0.0f,
+    0.5f, -4.2f, 0.0f,
+    0.0f,-4.0f,0.0f,
+    0.2f,-4.2f,0.0f,
+    -0.2f,-4.2f,0.0f,
+    };
 struct Point
 {
   float x;
@@ -53,7 +65,6 @@ void positions(struct Letter *letter, float *positions_x, float positions_y, int
   }
 }
 
-float colors[] = {0.2f, 0.3f, 0.3f};
 // Input vertex data, different for all executions of this shader.
 // Output data color, will be interpolated for each fragment.
 const char *vertexShaderSource = "#version 330 core\n"
@@ -82,8 +93,11 @@ void add_letters(struct Letter l)
   //printf("begin_point:%d\n", point);
   while (i < l.n_points)
   {
+    color[point_color++] = 0.0f;
     vertices[point++] = l.letter[i++] + l.p.x;
+    color[point_color++] = 0.0f;
     vertices[point++] = l.letter[i++] + l.p.y;
+    color[point_color++] = 0.0f;
     vertices[point++] = l.letter[i++];
   }
   //printf("end_point:%d\n", point);
@@ -127,10 +141,9 @@ int main()
   // vertices give a triangle. A cube has 6 faces with 2 triangles each, so this
   // makes 6*2=12 triangles, and 12*3 vertices
   // ------------------------------------------------------------------
-  float colors[100000];
 
   struct Letter *letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
-  float n[] = {-5.5, -3.2, -0.5, 1.5, 5.5, 3.6};
+  float n[] = {-5.5, -3.2, -0.5, 1.5, 3.6, 5.5};
   positions(letter, n, 0, 6);
 
   letter[0].letter = letra_psy();
@@ -149,14 +162,16 @@ int main()
   letter[3].n_points = size_p;
   //printf("p:%d\n", letter[3].n_points);
 
-  letter[4].letter = letra_rafa();
-  letter[4].n_points = size_r;
   //printf("r:%d\n", letter[4].n_points);
 
-  letter[5].letter = letra_bruno();
-  letter[5].n_points = size_c;
+  letter[4].letter = letra_bruno();
+  letter[4].n_points = size_c;
   //printf("c:%d\n", letter[5].n_points);
-  letters=letter;
+
+    letter[5].letter = letra_rafa();
+  letter[5].n_points = size_r;
+
+  letters = letter;
   reset();
 
   printf("total:%d\n", point);
@@ -230,7 +245,7 @@ int main()
   // View camera matrix
   view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
   // Model matrix : an identity matrix (model will be at the origin)
-  Model = glm::rotate(Model, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  Model = glm::rotate(Model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
   // Our ModelViewProjection : multiplication of our 3 matrices
   // Remember, matrix multiplication is the other way around
   glm::mat4 MVP = Projection * view * Model;
@@ -242,10 +257,6 @@ int main()
   // -----------
   while (!glfwWindowShouldClose(window))
   {
-    // input
-    // -----
-    unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
-    processInput(window);
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
@@ -257,7 +268,7 @@ int main()
 
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
     // 1rst attribute buffer : vertices
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -295,6 +306,10 @@ int main()
        generally don't unbind VAOs (nor VBOs) when it's not directly 
        necessary.*/
     glBindVertexArray(0);
+    // input
+    // -----
+    unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
+    processInput(window);
     glm::mat4 MVP = Projection * view * Model;
     // render
     // ------
@@ -329,12 +344,12 @@ int main()
 	 --------------------------------------------------------------*/
     glfwSwapBuffers(window);
     glfwPollEvents();
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(shaderProgram);
   }
   // optional: de-allocate all resources once they've outlived their purpose:
   // ------------------------------------------------------------------------
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
-  glDeleteProgram(shaderProgram);
   // glfw: terminate, clearing all previously allocated GLFW resources.
   // ------------------------------------------------------------------
   glfwTerminate();
@@ -444,35 +459,44 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
   // retina displays.
   glViewport(0, 0, width, height);
 }
+void square_selection(struct Point selected){
+    for (int i = 0; i < sizeof(selection) / sizeof(float); i++)
+  {
+    color[point_color++] = 1.0f;
+    vertices[point++] = (selection[i]);
+  }
+}
 
 void resize(int s)
 {
-  struct Letter *under = (struct Letter *)malloc(5 * sizeof(struct Letter));
+  struct Letter *under = (struct Letter *)malloc(6 * sizeof(struct Letter));
   struct Letter highlight;
 
-  float n[] = {-3.5, -1.7, -0, 1.7, 3.5};
-  positions(under, n, -5, 5);
+  float n[] = {-3, -1.7, -0.5,0.5, 1.5, 2.5};
+  positions(under, n, -5, 6);
   highlight.p.x = 0;
   highlight.p.y = 1;
+  struct Point selected;
   int und = 0;
   for (int i = 0; i < 6; i++)
   {
-    if (i != s)
-    {
-      under[und].letter = resize_letter(letters[i].letter, letters[i].n_points, 0.5);
-      under[und].n_points = letters[i].n_points;
-      und++;
-    }
-    else
+    if (i == s)
     {
       highlight.letter = resize_letter(letters[i].letter, letters[i].n_points, 4);
       highlight.n_points = letters[i].n_points;
+      selected=letters[i].p;
     }
+    under[und].letter = resize_letter(letters[i].letter, letters[i].n_points, 0.5);
+    under[und].n_points = letters[i].n_points;
+    und++;
   }
   printf("clear vertices\n");
   memset(vertices, 0, point * sizeof(float));
+  memset(color, 0, point_color * sizeof(float));
   point = 0;
-  for (int i = 0; i < 5; i++)
+  point_color = 0;
+  square_selection(selected);
+  for (int i = 0; i < 6; i++)
   {
     add_letters(under[i]);
   }
@@ -482,10 +506,12 @@ void resize(int s)
 void reset()
 {
   memset(vertices, 0, point * sizeof(float));
+  memset(color, 0, point_color * sizeof(float));
   point = 0;
+  point_color = 0;
   for (int i = 0; i < 6; i++)
   {
     add_letters(letters[i]);
   }
-  max = (point - 1) / 3;
+  max = point / 3;
 }
