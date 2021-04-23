@@ -24,7 +24,7 @@ int values = 0;
 int point_color = 0;
 float all_letters_coordinates[100000];
 float color[100000];
-const float radius = 30.0f;
+float radius = 10.0f;
 float camX = radius;
 float camZ = radius;
 const float selection[] = {
@@ -139,7 +139,7 @@ int main()
 
   //printf("total:%d\n", values);
   max = values / 3;
-  printf("%d\n", values == all_letters.all_points);
+  //printf("%d\n", values == all_letters.all_points);
 
   unsigned int VAO_all_letters, VAO_single_letter;
   unsigned int VBO_all_letters, VBO_single_letter;
@@ -251,6 +251,7 @@ int main()
     glDeleteVertexArrays(1, &VAO_single_letter);
     glDeleteBuffers(1, &VBO_single_letter);
     glfwPollEvents();
+    printf("velo:%f\n",radius);
   }
   glDeleteProgram(shaderProgram);
   glfwTerminate();
@@ -265,19 +266,19 @@ void processInput(GLFWwindow *window)
   }
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
   {
-    highlight.Model = glm::rotate(highlight.Model, glm::radians(30.0f), glm::vec3(1, 0, 0));
+    highlight.Model = glm::rotate(highlight.Model, glm::radians(radius), glm::vec3(1, 0, 0));
   }
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
   {
-    highlight.Model = glm::rotate(highlight.Model, glm::radians(-30.0f), glm::vec3(1, 0, 0));
+    highlight.Model = glm::rotate(highlight.Model, glm::radians(-radius), glm::vec3(1, 0, 0));
   }
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
   {
-    highlight.Model = glm::rotate(highlight.Model, glm::radians(30.0f), glm::vec3(0, 1, 0));
+    highlight.Model = glm::rotate(highlight.Model, glm::radians(-radius), glm::vec3(0, 1, 0));
   }
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
   {
-    highlight.Model = glm::rotate(highlight.Model, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+    highlight.Model = glm::rotate(highlight.Model, glm::radians(radius), glm::vec3(0, 1, 0));
   }
 
   if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS || cam == 1)
@@ -298,11 +299,13 @@ void processInput(GLFWwindow *window)
     all_letters.view = glm::lookAt(glm::vec3(0.0, 0.0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
     cam = 3;
   }
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || cam == 4)
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
   {
-    highlight.view = glm::lookAt(glm::vec3(0.0, 0.0, -1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-    all_letters.view = glm::lookAt(glm::vec3(0.0, 0.0, -1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-    cam = 4;
+    radius=radius*0.3f;
+  }
+  if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS){
+    if(radius>0)
+      radius=radius*(-0.3f);
   }
   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS || cam == 5)
   {
@@ -387,7 +390,7 @@ void reset()
   values = 0;
   for (int i = 0; i < 6; i++)
   {
-    printf("%d\n", all_letters.letter[i].n_points);
+    //printf("%d\n", all_letters.letter[i].n_points);
     for (int j = 0; j < all_letters.letter[i].n_points; j++)
     {
       //printf("v:%f %f %f\n", letters[i].letter[j].x, letters[i].letter[j].y, letters[i].letter[j].z);
