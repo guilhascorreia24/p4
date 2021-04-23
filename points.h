@@ -6,6 +6,26 @@ int size_p = 0;
 int size_r = 0;
 int size_c = 0;
 int N = 9;
+struct Point{
+    float x,y,z;
+};
+
+struct Point *convert(float *x,int size){
+    struct Point *points=(struct Point *)malloc((size)*sizeof(struct Point));
+    //printf("dasas %d\\n",size);
+    int p=0;
+    for(int i=0;i<size;i+=3){
+        points[p].x=x[i];
+        points[p].y=x[i+1];
+        points[p].z=x[i+2];
+        //printf("%f %f %f\n",points[p].x,points[p].y,points[p].z);
+        p++;
+    }
+    //printf("sakjhds \n");
+    return points;
+}
+
+
 float letra_g[] = {
     -0.37f, 1.15f, -0.13f,
     -0.30f, 1.05f, -0.13f,
@@ -15327,7 +15347,7 @@ float letra_c[] = {
 
 };
 
-float *letra_goncalo()
+struct Point *letra_goncalo()
 {
     float scale = 0.75;
     const int totalVertices = sizeof(letra_g) / 3 / sizeof(float);
@@ -15348,10 +15368,11 @@ float *letra_goncalo()
         letra_g[i + 4] = letra_g[i + 4] * 0.75;
         letra_g[i + 3] = letra_g[i + 3] * 0.75;
     }
-    return letra_g;
+    struct Point *points=convert(letra_g,sizeof(letra_g) / sizeof(float));
+    return points;
 }
 
-float *letra_rafa()
+struct Point *letra_rafa()
 {
     float scale = 1.45;
     for (int i = 0; i < sizeof(letra_r)/sizeof(float); i++)
@@ -15362,10 +15383,10 @@ float *letra_rafa()
         }
     }
     size_r = sizeof(letra_r)/sizeof(float);
-    return letra_r;
+    return convert(letra_r,sizeof(letra_r) / sizeof(float));
 }
 
-float *letra_P()
+struct Point *letra_P()
 {
     static float colors[3410];
     float scale = 1.55;
@@ -15380,10 +15401,10 @@ float *letra_P()
         colors[i] = r;
     }
     size_p = sizeof(letra_p)/sizeof(float);
-    return letra_p;
+    return convert(letra_p,sizeof(letra_p) / sizeof(float));
 }
 
-float *letra_psy()
+struct Point *letra_psy()
 {
     const int totalVertices = sizeof(letra_psi) / sizeof(float) / 3;
     for (int i = 0; i < totalVertices; ++i)
@@ -15392,7 +15413,7 @@ float *letra_psy()
         letra_psi[i * 3 + 1] = -(letra_psi[i * 3 + 1] - 32.0f) / 30.0f;
     }
     size_psi = totalVertices*3;
-    return letra_psi;
+    return convert(letra_psi,sizeof(letra_psi) / sizeof(float));
 }
 
 unsigned long long factorial(int t)
@@ -15402,6 +15423,7 @@ unsigned long long factorial(int t)
         res *= i;
     return res;
 }
+
 float get(float t, float xp[])
 {
     int k = 0;
@@ -15415,6 +15437,7 @@ float get(float t, float xp[])
     }
     return result;
 }
+
 void base_lateral_cover(int *i, float base[], float z_sub, float z_sup)
 {
     omega[((*i))++] = base[3];
@@ -15512,7 +15535,8 @@ void base_lateral_cover(int *i, float base[], float z_sub, float z_sup)
     omega[(*i)++] = base[115];
     omega[(*i)++] = z_sub; //f1
 }
-float *letter_omega()
+
+struct Point *letra_omega()
 {
     int i = 0;
     float xe[] = {0.1f, 1.1f, 0.5f, 1.35f, 0.2f, 0.004f, -0.59f, -0.652f, -1.304f, -0.1f};
@@ -15758,7 +15782,6 @@ float *letter_omega()
         omega[i++] = z_sup;
     }
     size_omega = i;
-    //printf("%d\n",size_omega);
     for (int k = 0; k < size_omega; k++)
     {
         if (k % 3 == 1)
@@ -15768,11 +15791,10 @@ float *letter_omega()
             omega[k] = omega[k] * scale;
         }
     }
-    //printf("aslkjdsalkj\n");
-    return omega;
+    return convert(omega,size_omega);
 }
 
-float *letra_bruno()
+struct Point *letra_bruno()
 {
     float scale = 1.45;
     size_c = sizeof(letra_c) / sizeof(float);
@@ -15787,8 +15809,9 @@ float *letra_bruno()
             letra_c[i] = letra_c[i] * scale;
         }
     }
-    return letra_c;
+    return convert(letra_c,sizeof(letra_c) / sizeof(float));
 }
+
 float *resize_letter(float *l,int size,float scale){
     float *resized=(float *)malloc(sizeof(float)*size);
     //printf("size:%d\n",size);
@@ -15799,6 +15822,5 @@ float *resize_letter(float *l,int size,float scale){
             resized[i]=l[i]*scale;
         }
     }
-    //printf("resized\n");
     return resized;
 }
