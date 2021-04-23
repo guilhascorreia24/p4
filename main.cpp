@@ -266,7 +266,8 @@ int main()
   Model = glm::rotate(Model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
   // Our ModelViewProjection : multiplication of our 3 matrices
   // Remember, matrix multiplication is the other way around
-  glm::mat4 MVP = Projection * view * Model;
+  glm::mat4 MVP2 = Projection * view * Model;
+  glm::mat4 MVP=MVP2; 
 
   // Our vertices. Tree consecutive floats give a 3D vertex; Three consecutive
   // vertices give a triangle. A cube has 6 faces with 2 triangles each, so this
@@ -275,6 +276,18 @@ int main()
   // -----------
   while (!glfwWindowShouldClose(window))
   {
+        processInput(window);
+    glm::mat4 MVP = Projection * view * Model;
+        glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glUseProgram(shaderProgram);
+    glBindVertexArray(VAO);
+    int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
@@ -288,6 +301,8 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, EBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
     // 1rst attribute buffer : vertices
+    unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glVertexAttribPointer(
@@ -299,6 +314,21 @@ int main()
         0,        // stride
         (void *)0 // array buffer offset
     );
+    glDrawArrays(GL_TRIANGLES, 0, max);
+    
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP2[0][0]);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glVertexAttribPointer(
+        0,        // attribute. No particular reason for 0, but
+                  // must match the layout in the shader.
+        3,        // size
+        GL_FLOAT, // type
+        GL_FALSE, // normalized?
+        0,        // stride
+        (void *)0 // array buffer offset
+    );
+    glDrawArrays(GL_TRIANGLES, 0, max);
 
     // 2nd attribute buffer : colors
     glEnableVertexAttribArray(1);
@@ -326,35 +356,6 @@ int main()
     glBindVertexArray(0);
     // input
     // -----
-    unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
-    processInput(window);
-    glm::mat4 MVP = Projection * view * Model;
-    // render
-    // ------
-    //glClearColor(0.5f, 0.5f, 0.5f, 1.0f); //grey rendering
-    //glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //green? rendering
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // draw our first triangle: using shader program
-    glUseProgram(shaderProgram);
-    glBindVertexArray(VAO);
-    // update the uniform color
-    int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-    //glUniform4f(vertexColorLocation, redValue, greenValue, blueValue, 1.0f);
-    // Dark blue background
-    glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
-
-    // Enable depth test
-    glEnable(GL_DEPTH_TEST);
-    // Accept fragment if it closer to the camera than the former one
-    glDepthFunc(GL_LESS);
-
-    // also clear the depth buffer now!
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // seeing as we only have a single VAO there's no need to bind
-    // it every time, but we'll do so to keep things a bit more organized
-    glDrawArrays(GL_TRIANGLES, 0, max);
-    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
     // glBindVertexArray(0); // no need to unbind it every time
     /* glfw: swap buffers and poll IO events (keys pressed/released, 
@@ -491,7 +492,7 @@ void resize(int s)
   struct Letter *under = (struct Letter *)malloc(6 * sizeof(struct Letter));
   struct Letter highlight;
 
-  float n[] = {-2.2, -1.2,0, 1, 2, 3};
+  float n[] = {-2.2, -1.2, 0, 1, 2, 3};
   positions(under, n, -5, 6);
   highlight.p.x = 0;
   highlight.p.y = 1;
@@ -512,7 +513,8 @@ void resize(int s)
       under[und].letter = resize_letter(letters[i].letter, letters[i].n_points, 0.5);
       under[und].n_points = letters[i].n_points;
       und++;
-      if(und==2) und++;
+      if (und == 2)
+        und++;
     }
   }
   printf("clear vertices\n");
@@ -521,12 +523,12 @@ void resize(int s)
   point = 0;
   point_color = 0;
   square_selection(selected);
-  int i=0;
-  while(i<6)
+  int i = 0;
+  while (i < 6)
   {
     add_letters(under[i++]);
   }
-  add_letters(highlight);
+  //add_letters(highlight);
   max = point / 3;
 }
 void reset()
