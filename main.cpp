@@ -29,16 +29,34 @@ const float radius = 30.0f;
 float camX = radius;
 float camZ = radius;
 const float selection[] = {
-    0.5f, -4.2f, 0.0f,
-    -0.5f, -5.7f, 0.0f,
-    0.5f, -5.7f, 0.0f,
-    -0.5f, -4.2f, 0.0f,
-    -0.5f, -5.7f, 0.0f,
-    0.5f, -4.2f, 0.0f,
-    0.0f,-4.0f,0.0f,
-    0.2f,-4.2f,0.0f,
-    -0.2f,-4.2f,0.0f,
-    };
+    0.5f,
+    -4.2f,
+    0.0f,
+    -0.5f,
+    -5.7f,
+    0.0f,
+    0.5f,
+    -5.7f,
+    0.0f,
+    -0.5f,
+    -4.2f,
+    0.0f,
+    -0.5f,
+    -5.7f,
+    0.0f,
+    0.5f,
+    -4.2f,
+    0.0f,
+    0.0f,
+    -4.0f,
+    0.0f,
+    0.2f,
+    -4.2f,
+    0.0f,
+    -0.2f,
+    -4.2f,
+    0.0f,
+};
 struct Point
 {
   float x;
@@ -168,7 +186,7 @@ int main()
   letter[4].n_points = size_c;
   //printf("c:%d\n", letter[5].n_points);
 
-    letter[5].letter = letra_rafa();
+  letter[5].letter = letra_rafa();
   letter[5].n_points = size_r;
 
   letters = letter;
@@ -344,14 +362,14 @@ int main()
 	 --------------------------------------------------------------*/
     glfwSwapBuffers(window);
     glfwPollEvents();
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
   }
   // optional: de-allocate all resources once they've outlived their purpose:
   // ------------------------------------------------------------------------
   // glfw: terminate, clearing all previously allocated GLFW resources.
   // ------------------------------------------------------------------
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteProgram(shaderProgram);
   glfwTerminate();
   return 0;
 }
@@ -459,8 +477,9 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
   // retina displays.
   glViewport(0, 0, width, height);
 }
-void square_selection(struct Point selected){
-    for (int i = 0; i < sizeof(selection) / sizeof(float); i++)
+void square_selection(struct Point selected)
+{
+  for (int i = 0; i < sizeof(selection) / sizeof(float); i++)
   {
     color[point_color++] = 1.0f;
     vertices[point++] = (selection[i]);
@@ -472,41 +491,48 @@ void resize(int s)
   struct Letter *under = (struct Letter *)malloc(6 * sizeof(struct Letter));
   struct Letter highlight;
 
-  float n[] = {-3, -1.7, -0.5,0.5, 1.5, 2.5};
+  float n[] = {-2.2, -1.2,0, 1, 2, 3};
   positions(under, n, -5, 6);
   highlight.p.x = 0;
   highlight.p.y = 1;
   struct Point selected;
   int und = 0;
+  under[2].letter = resize_letter(letters[s].letter, letters[s].n_points, 0.5);
+  under[2].n_points = letters[s].n_points;
   for (int i = 0; i < 6; i++)
   {
     if (i == s)
     {
       highlight.letter = resize_letter(letters[i].letter, letters[i].n_points, 4);
       highlight.n_points = letters[i].n_points;
-      selected=letters[i].p;
+      selected = letters[i].p;
     }
-    under[und].letter = resize_letter(letters[i].letter, letters[i].n_points, 0.5);
-    under[und].n_points = letters[i].n_points;
-    und++;
+    else
+    {
+      under[und].letter = resize_letter(letters[i].letter, letters[i].n_points, 0.5);
+      under[und].n_points = letters[i].n_points;
+      und++;
+      if(und==2) und++;
+    }
   }
   printf("clear vertices\n");
-  memset(vertices, 0, point * sizeof(float));
-  memset(color, 0, point_color * sizeof(float));
+  //memset(vertices, 0, point * sizeof(float));
+  //memset(color, 0, point_color * sizeof(float));
   point = 0;
   point_color = 0;
   square_selection(selected);
-  for (int i = 0; i < 6; i++)
+  int i=0;
+  while(i<6)
   {
-    add_letters(under[i]);
+    add_letters(under[i++]);
   }
   add_letters(highlight);
   max = point / 3;
 }
 void reset()
 {
-  memset(vertices, 0, point * sizeof(float));
-  memset(color, 0, point_color * sizeof(float));
+  //memset(vertices, 0, point * sizeof(float));
+  //memset(color, 0, point_color * sizeof(float));
   point = 0;
   point_color = 0;
   for (int i = 0; i < 6; i++)
