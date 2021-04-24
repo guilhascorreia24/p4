@@ -374,16 +374,19 @@ void processInput(GLFWwindow *window)
     highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
   }
 
+  glm::mat4 S = glm::mat4(1.0f);
+  S = glm::scale(S, glm::vec3(0.9f, 0.9f, 0.9f));
+  glm::mat4 T = glm::mat4(1.0f);
+  T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.5f));
+
   if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
   {
-    highlight.Model = glm::scale(highlight.Model, glm::vec3(0.1, 0.1, 0.1));
-    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, -5));
+    highlight.Model = highlight.Model * inverse(T) * S;
   }
 
   if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
   {
-    highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
-    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, 5));
+    highlight.Model = highlight.Model * inverse(S) * T;
   }
 }
 
