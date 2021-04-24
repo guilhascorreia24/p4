@@ -12,6 +12,8 @@ void processInput(GLFWwindow *window);
 void resize(int s);
 void reset();
 void positions(struct Letter *letter, float *positions_x, float positions_y, int size);
+void mouseButtonCallback(GLFWwindow* window, int button ,int action ,int mods);
+void getNormalizedCoords();
 
 glm::mat4 view, Projection, MVP, Model = glm::mat4(1.0f);
 const int SCR_WIDTH = 900;
@@ -27,6 +29,9 @@ float color[100000];
 float radius = 10.0f;
 float camX = radius;
 float camZ = radius;
+double xpos, ypos;
+float xpos1, ypos1;
+bool lbutton_down;
 const float selection[] = {
     0.5f,
     -4.2f,
@@ -193,10 +198,34 @@ int main()
   all_letters.Model = Model;
   all_letters.view = view;
   MVP = Projection * view * Model;
+
+  glfwSetMouseButtonCallback(window,mouseButtonCallback);
   while (!glfwWindowShouldClose(window))
   {
     processInput(window);
     highlight.MVP = Projection * highlight.view * highlight.Model;
+    //_----------------------------
+    if(lbutton_down)
+    {
+    glfwGetCursorPos(window, &xpos, &ypos);
+    getNormalizedCoords();
+    highlight.Model = glm::translate(highlight.Model, glm::vec3(xpos1/100, ypos1/100, 0.0));
+    /*int s;
+    for (int i = 0; i < 6; i++)
+    {
+      if(highlight.all_points == all_letters.letter[i].n_points)
+        s = i;
+    }
+    for(int i = 0; i<highlight.all_points;i++)
+    {
+      highlight.letter[0].letter[i].x = all_letters.letter[s].letter[i].x;
+      highlight.letter[0].letter[i].y = all_letters.letter[s].letter[i].y;
+      highlight.letter[0].letter[i].x += xpos1;
+      highlight.letter[0].letter[i].y += ypos1;
+    }*/
+    
+    }
+    //----------------------
     all_letters.MVP = Projection * all_letters.view * all_letters.Model;
 
     glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
@@ -251,7 +280,7 @@ int main()
     glDeleteVertexArrays(1, &VAO_single_letter);
     glDeleteBuffers(1, &VBO_single_letter);
     glfwPollEvents();
-    printf("velo:%f\n",radius);
+    //printf("velo:%f\n",radius);
   }
   glDeleteProgram(shaderProgram);
   glfwTerminate();
@@ -412,3 +441,23 @@ void positions(struct Letter *letter, float *positions_x, float positions_y, int
     letter[i].translation = p;
   }
 }
+
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+ 
+  if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if(GLFW_PRESS == action)
+            lbutton_down = true;
+        else if(GLFW_RELEASE == action)
+            lbutton_down = false;
+    }
+
+
+}
+
+void getNormalizedCoords()
+{
+  xpos1 = (2.0f*xpos) / SCR_WIDTH - 1;
+  ypos1 = -1 * ((2.0f*ypos) / SCR_HEIGHT - 1.0f);
+}
+ 
