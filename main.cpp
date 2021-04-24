@@ -77,7 +77,7 @@ struct Object
 };
 
 struct Object all_letters;
-struct Object highlight,clone_highlight;
+struct Object highlight, clone_highlight;
 const char *vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
                                  "layout (location = 1) in vec3 vertexColor;\n"
@@ -198,7 +198,7 @@ int main()
   all_letters.Model = Model;
   all_letters.view = view;
   MVP = Projection * view * Model;
-  clone_highlight=highlight;
+  clone_highlight = highlight;
 
   glfwSetMouseButtonCallback(window, mouseButtonCallback);
   while (!glfwWindowShouldClose(window))
@@ -370,21 +370,20 @@ void processInput(GLFWwindow *window)
   {
     glfwGetCursorPos(window, &xpos, &ypos);
     getNormalizedCoords();
-    highlight.Model = glm::translate(clone_highlight.Model,glm::vec3(xpos1,ypos1,5));
+    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, 0));
     highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
   }
 
-  glm::mat4 S = glm::mat4(1.0f);
-  S = glm::scale(S, glm::vec3(0.9f, 0.9f, 0.9f));
+  if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+  {
+    highlight.Model = glm::scale(highlight.Model, glm::vec3(0.1, 0.1, 0.1));
+    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, 5));
+  }
 
-  if(glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-    if(MVP[0][0] <= 1.73205) // MAX VALUE
-      MVP = MVP * inverse(S);
-    }
-
-  if(glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-    if(MVP[0][0] >= 0.0270633) // MIN VALUE
-      MVP = MVP * S;
+  if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+  {
+    highlight.Model = inverse(glm::scale(inverse(highlight.Model), glm::vec3(0.1, 0.1, 0.1)));
+    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, -5));
   }
 }
 
@@ -458,9 +457,9 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 
 void getNormalizedCoords()
 {
-  xpos1 = (-1.0)+((2.0f * xpos) / (SCR_WIDTH));
-  ypos1 = (1.0)+((-2.0f * ypos) / (SCR_HEIGHT));
-  xpos1=xpos1*7;
-  ypos1=ypos1*7;
-  printf("%f %f\n",xpos1,ypos1);
+  xpos1 = (-1.0) + ((2.0f * xpos) / (SCR_WIDTH));
+  ypos1 = (1.0) + ((-2.0f * ypos) / (SCR_HEIGHT));
+  xpos1 = xpos1 * 7;
+  ypos1 = ypos1 * 7;
+  printf("%f %f\n", xpos1, ypos1);
 }
