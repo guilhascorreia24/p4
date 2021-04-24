@@ -373,6 +373,19 @@ void processInput(GLFWwindow *window)
     highlight.Model = glm::translate(clone_highlight.Model,glm::vec3(xpos1,ypos1,5));
     highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
   }
+
+  glm::mat4 S = glm::mat4(1.0f);
+  S = glm::scale(S, glm::vec3(0.9f, 0.9f, 0.9f));
+
+  if(glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    if(MVP[0][0] <= 1.73205) // MAX VALUE
+      MVP = MVP * inverse(S);
+    }
+
+  if(glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    if(MVP[0][0] >= 0.0270633) // MIN VALUE
+      MVP = MVP * S;
+  }
 }
 
 /* glfw: whenever the window size changed (by OS or user resize) this
