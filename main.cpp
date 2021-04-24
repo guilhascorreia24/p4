@@ -377,13 +377,13 @@ void processInput(GLFWwindow *window)
   if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
   {
     highlight.Model = glm::scale(highlight.Model, glm::vec3(0.1, 0.1, 0.1));
-    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, 5));
+    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, -5));
   }
 
   if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
   {
-    highlight.Model = inverse(glm::scale(inverse(highlight.Model), glm::vec3(0.1, 0.1, 0.1)));
-    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, -5));
+    highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
+    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, 5));
   }
 }
 
