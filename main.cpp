@@ -12,7 +12,7 @@ void processInput(GLFWwindow *window);
 void resize(int s);
 void reset();
 void positions(struct Letter *letter, float *positions_x, float positions_y, int size);
-void mouseButtonCallback(GLFWwindow* window, int button ,int action ,int mods);
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 void getNormalizedCoords();
 
 glm::mat4 view, Projection, MVP, Model = glm::mat4(1.0f);
@@ -77,7 +77,7 @@ struct Object
 };
 
 struct Object all_letters;
-struct Object highlight;
+struct Object highlight,clone_highlight;
 const char *vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
                                  "layout (location = 1) in vec3 vertexColor;\n"
@@ -198,33 +198,14 @@ int main()
   all_letters.Model = Model;
   all_letters.view = view;
   MVP = Projection * view * Model;
+  clone_highlight=highlight;
 
-  glfwSetMouseButtonCallback(window,mouseButtonCallback);
+  glfwSetMouseButtonCallback(window, mouseButtonCallback);
   while (!glfwWindowShouldClose(window))
   {
     processInput(window);
     highlight.MVP = Projection * highlight.view * highlight.Model;
     //_----------------------------
-    if(lbutton_down)
-    {
-    glfwGetCursorPos(window, &xpos, &ypos);
-    getNormalizedCoords();
-    highlight.Model = glm::translate(highlight.Model, glm::vec3(xpos1/100, ypos1/100, 0.0));
-    /*int s;
-    for (int i = 0; i < 6; i++)
-    {
-      if(highlight.all_points == all_letters.letter[i].n_points)
-        s = i;
-    }
-    for(int i = 0; i<highlight.all_points;i++)
-    {
-      highlight.letter[0].letter[i].x = all_letters.letter[s].letter[i].x;
-      highlight.letter[0].letter[i].y = all_letters.letter[s].letter[i].y;
-      highlight.letter[0].letter[i].x += xpos1;
-      highlight.letter[0].letter[i].y += ypos1;
-    }*/
-    
-    }
     //----------------------
     all_letters.MVP = Projection * all_letters.view * all_letters.Model;
 
@@ -330,11 +311,12 @@ void processInput(GLFWwindow *window)
   }
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
   {
-    radius=radius*0.3f;
+    radius = radius * 0.3f;
   }
-  if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS){
-    if(radius>0)
-      radius=radius*(-0.3f);
+  if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+  {
+    if (radius > 0)
+      radius = radius * (-0.3f);
   }
   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS || cam == 5)
   {
@@ -384,6 +366,13 @@ void processInput(GLFWwindow *window)
     letter = -1;
     reset();
   }
+  if (lbutton_down)
+  {
+    glfwGetCursorPos(window, &xpos, &ypos);
+    getNormalizedCoords();
+    highlight.Model = glm::translate(clone_highlight.Model,glm::vec3(xpos1,ypos1,5));
+    highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
+  }
 }
 
 /* glfw: whenever the window size changed (by OS or user resize) this
@@ -413,7 +402,7 @@ void resize(int s)
 }
 void reset()
 {
-    highlight.all_points=0;
+  highlight.all_points = 0;
   all_letters.Model = Model;
   all_letters.Model = glm::translate(all_letters.Model, glm::vec3(0.0, 0, 0.0));
   values = 0;
@@ -442,22 +431,23 @@ void positions(struct Letter *letter, float *positions_x, float positions_y, int
   }
 }
 
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
- 
-  if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        if(GLFW_PRESS == action)
-            lbutton_down = true;
-        else if(GLFW_RELEASE == action)
-            lbutton_down = false;
-    }
 
-
+  if (button == GLFW_MOUSE_BUTTON_LEFT)
+  {
+    if (GLFW_PRESS == action)
+      lbutton_down = true;
+    else if (GLFW_RELEASE == action)
+      lbutton_down = false;
+  }
 }
 
 void getNormalizedCoords()
 {
-  xpos1 = (2.0f*xpos) / SCR_WIDTH - 1;
-  ypos1 = -1 * ((2.0f*ypos) / SCR_HEIGHT - 1.0f);
+  xpos1 = (-1.0)+((2.0f * xpos) / (SCR_WIDTH));
+  ypos1 = (1.0)+((-2.0f * ypos) / (SCR_HEIGHT));
+  xpos1=xpos1*7;
+  ypos1=ypos1*7;
+  printf("%f %f\n",xpos1,ypos1);
 }
- 
