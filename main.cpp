@@ -32,6 +32,8 @@ float camZ = radius;
 double xpos, ypos;
 float xpos1, ypos1;
 bool lbutton_down;
+glm::mat4 rotates = glm::mat4(1.0f);
+glm::mat4 identity = glm::mat4(1.0f);
 const float selection[] = {
     0.5f,
     -4.2f,
@@ -123,6 +125,9 @@ int main()
     return -1;
   }
 
+  //_-------------
+
+//----------------------
   all_letters.letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
   highlight.letter = (struct Letter *)malloc(sizeof(struct Letter));
   float n[] = {-5.5, -3.2, -0.5, 1.5, 3.6, 5.5};
@@ -270,25 +275,43 @@ int main()
 
 void processInput(GLFWwindow *window)
 {
+  if (lbutton_down)
+  {
+    glfwGetCursorPos(window, &xpos, &ypos);
+    getNormalizedCoords();
+    highlight.Model = glm::mat4(1.0f);
+    //highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
+    glm::mat4 translates = glm::translate(highlight.Model, glm::vec3(xpos1, ypos1, 0));
+    highlight.Model = translates * rotates;
+    //highlight.Model = inverse(glm::scale(highlight.Model, glm::vec3(2, 2, 2)));
+    if(rotates == identity)
+       highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
+    
+  }
+
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
   {
     glfwSetWindowShouldClose(window, true);
   }
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
   {
-    highlight.Model = glm::rotate(highlight.Model, glm::radians(radius), glm::vec3(1, 0, 0));
+    rotates = glm::rotate(highlight.Model, glm::radians(radius), glm::vec3(1, 0, 0));
+    highlight.Model = rotates;
   }
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
   {
-    highlight.Model = glm::rotate(highlight.Model, glm::radians(-radius), glm::vec3(1, 0, 0));
+    rotates = glm::rotate(highlight.Model, glm::radians(-radius), glm::vec3(1, 0, 0));
+    highlight.Model = rotates;
   }
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
   {
-    highlight.Model = glm::rotate(highlight.Model, glm::radians(-radius), glm::vec3(0, 1, 0));
+    rotates = glm::rotate(highlight.Model, glm::radians(-radius), glm::vec3(0, 1, 0));
+    highlight.Model = rotates;
   }
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
   {
-    highlight.Model = glm::rotate(highlight.Model, glm::radians(radius), glm::vec3(0, 1, 0));
+    rotates = glm::rotate(highlight.Model, glm::radians(radius), glm::vec3(0, 1, 0));
+    highlight.Model = rotates;
   }
 
   if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS || cam == 1)
@@ -366,27 +389,18 @@ void processInput(GLFWwindow *window)
     letter = -1;
     reset();
   }
-  if (lbutton_down)
-  {
-    glfwGetCursorPos(window, &xpos, &ypos);
-    getNormalizedCoords();
-    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, 0));
-    highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
-  }
 
-  glm::mat4 S = glm::mat4(1.0f);
-  S = glm::scale(S, glm::vec3(0.9f, 0.9f, 0.9f));
-  glm::mat4 T = glm::mat4(1.0f);
-  T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.5f));
 
   if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
   {
-    highlight.Model = highlight.Model * inverse(T) * S;
+    highlight.Model = glm::scale(highlight.Model, glm::vec3(0.1, 0.1, 0.1));
+    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, -5));
   }
 
   if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
   {
-    highlight.Model = highlight.Model * inverse(S) * T;
+    highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
+    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, 5));
   }
 }
 
