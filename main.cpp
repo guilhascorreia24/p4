@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/io.hpp>
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 void resize(int s);
@@ -15,7 +16,7 @@ void positions(struct Letter *letter, float *positions_x, float positions_y, int
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 void getNormalizedCoords();
 
-glm::mat4 view, Projection, MVP, Model = glm::mat4(1.0f);
+glm::mat4 view, Projection, MVP, Model = glm::mat4(1.0f), R, S, T;
 const int SCR_WIDTH = 900;
 const int SCR_HEIGHT = 600;
 bool colored = false;
@@ -63,7 +64,12 @@ const float selection[] = {
     -4.2f,
     0.0f,
 };
-
+float position[16] = {
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0};
+glm::mat4 p = glm::make_mat4(position);
 struct Letter
 {
   struct Point *letter;
@@ -127,7 +133,7 @@ int main()
 
   //_-------------
 
-//----------------------
+  //----------------------
   all_letters.letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
   highlight.letter = (struct Letter *)malloc(sizeof(struct Letter));
   float n[] = {-5.5, -3.2, -0.5, 1.5, 3.6, 5.5};
@@ -196,20 +202,29 @@ int main()
 
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
+  //scaling
+  S = glm::mat4(1.0f);
+  S = glm::scale(S, glm::vec3(0.9f, 0.9f, 0.9f));
+
+  //translation
+  T = glm::mat4(1.0f);
+  //T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.0f));
+
+  //rotation
+  R = glm::mat4(1.0f);
+  //R = glm::rotate(R, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
   Projection = glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f);
-  view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-  Model = glm::rotate(Model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  view = glm::lookAt(glm::vec3(0, 0, 7), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+  Model = glm::mat4(1.0f);
   all_letters.MVP = Projection * view * Model;
   all_letters.Model = Model;
   all_letters.view = view;
   MVP = Projection * view * Model;
-  clone_highlight = highlight;
-
   glfwSetMouseButtonCallback(window, mouseButtonCallback);
   while (!glfwWindowShouldClose(window))
   {
     processInput(window);
-    highlight.MVP = Projection * highlight.view * highlight.Model;
+    //highlight.MVP = Projection * highlight.view * highlight.Model;
     //_----------------------------
     //----------------------
     all_letters.MVP = Projection * all_letters.view * all_letters.Model;
@@ -275,43 +290,82 @@ int main()
 
 void processInput(GLFWwindow *window)
 {
-  if (lbutton_down)
+  if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
+  {
+    highlight.MVP = S * highlight.MVP;
+    printf("s\n");
+    std::cout << S << std::endl;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
+  }
+  if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
+  {
+    highlight.MVP = inverse(S) * highlight.MVP;
+    printf("s\n");
+    std::cout << inverse(S) << std::endl;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
+  }
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+  {
+    R = glm::mat4(1.0f);
+    R = glm::rotate(R, glm::radians(radius), glm::vec3(1, 0, 0));
+    printf("rotate\n");
+    std::cout << R << std::endl;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
+    highlight.MVP = highlight.MVP * R;
+  }
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+  {
+    R = glm::mat4(1.0f);
+    R = glm::rotate(R, glm::radians(-radius), glm::vec3(1, 0, 0));
+    printf("rotate\n");
+    std::cout << R << std::endl;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
+    highlight.MVP = highlight.MVP * R;
+  }
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+  {
+    R = glm::mat4(1.0f);
+    R = glm::rotate(R, glm::radians(-radius), glm::vec3(0, 1, 0));
+    printf("rotate\n");
+    std::cout << R << std::endl;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
+    highlight.MVP = highlight.MVP * R;
+  }
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+  {
+    R = glm::mat4(1.0f);
+    R = glm::rotate(R, glm::radians(radius), glm::vec3(0, 1, 0));
+    printf("rotate\n");
+    std::cout << R << std::endl;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
+    highlight.MVP = highlight.MVP * R;
+  }
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
   {
     glfwGetCursorPos(window, &xpos, &ypos);
     getNormalizedCoords();
-    highlight.Model = glm::mat4(1.0f);
-    //highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
-    glm::mat4 translates = glm::translate(highlight.Model, glm::vec3(xpos1, ypos1, 0));
-    highlight.Model = translates * rotates;
-    //highlight.Model = inverse(glm::scale(highlight.Model, glm::vec3(2, 2, 2)));
-    if(rotates == identity)
-       highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
-    
+    T = glm::translate(glm::mat4(1), glm::vec3(xpos1, ypos1, 0));
+    T = glm::mat4(-1) + T;
+    highlight.MVP = highlight.MVP - p;
+    p = T;
+    printf("trans\n");
+    std::cout << T << std::endl;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
+    highlight.MVP = highlight.MVP + T;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
   }
 
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
   {
     glfwSetWindowShouldClose(window, true);
-  }
-  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-  {
-    rotates = glm::rotate(highlight.Model, glm::radians(radius), glm::vec3(1, 0, 0));
-    highlight.Model = rotates;
-  }
-  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-  {
-    rotates = glm::rotate(highlight.Model, glm::radians(-radius), glm::vec3(1, 0, 0));
-    highlight.Model = rotates;
-  }
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-  {
-    rotates = glm::rotate(highlight.Model, glm::radians(-radius), glm::vec3(0, 1, 0));
-    highlight.Model = rotates;
-  }
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-  {
-    rotates = glm::rotate(highlight.Model, glm::radians(radius), glm::vec3(0, 1, 0));
-    highlight.Model = rotates;
   }
 
   if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS || cam == 1)
@@ -328,7 +382,7 @@ void processInput(GLFWwindow *window)
   }
   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS || cam == 3)
   {
-    highlight.view = glm::lookAt(glm::vec3(0.0, 0.0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    highlight.view = glm::lookAt(glm::vec3(0.0, 0.0, 7), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
     all_letters.view = glm::lookAt(glm::vec3(0.0, 0.0, 1), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
     cam = 3;
   }
@@ -389,19 +443,6 @@ void processInput(GLFWwindow *window)
     letter = -1;
     reset();
   }
-
-
-  if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-  {
-    highlight.Model = glm::scale(highlight.Model, glm::vec3(0.1, 0.1, 0.1));
-    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, -5));
-  }
-
-  if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-  {
-    highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
-    highlight.Model = glm::translate(clone_highlight.Model, glm::vec3(xpos1, ypos1, 5));
-  }
 }
 
 /* glfw: whenever the window size changed (by OS or user resize) this
@@ -418,16 +459,20 @@ void resize(int s)
   if (all_letters.Model == Model)
   {
     all_letters.Model = glm::scale(all_letters.Model, glm::vec3(0.7, 0.7, 0.7));
-    all_letters.Model = glm::translate(all_letters.Model, glm::vec3(0.0, -5, 0.0));
+    all_letters.Model = glm::translate(all_letters.Model, glm::vec3(0.0, -6, 0.0));
   }
   highlight.letter[0] = all_letters.letter[s];
   highlight.letter[0].n_points = all_letters.letter[s].n_points;
   highlight.all_points = highlight.letter[0].n_points;
-  highlight.MVP = MVP;
+  highlight.MVP=glm::mat4(0);
+  printf("antes\n");
+  std::cout << highlight.MVP << std::endl;
   highlight.Model = Model;
   highlight.view = view;
-  highlight.Model = glm::scale(highlight.Model, glm::vec3(2, 2, 2));
-  highlight.Model = glm::translate(highlight.Model, glm::vec3(0, 1, 0));
+
+  highlight.MVP = glm::mat4(1.0f) * glm::lookAt(glm::vec3(0, 0, 0.5), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)) * glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f) *glm::scale(glm::mat4(1), glm::vec3(2, 2, 2));
+   printf("deps\n");
+  std::cout << highlight.MVP << std::endl;
 }
 void reset()
 {
@@ -476,7 +521,7 @@ void getNormalizedCoords()
 {
   xpos1 = (-1.0) + ((2.0f * xpos) / (SCR_WIDTH));
   ypos1 = (1.0) + ((-2.0f * ypos) / (SCR_HEIGHT));
-  xpos1 = xpos1 * 7;
-  ypos1 = ypos1 * 7;
+  //xpos1 = xpos1 * 7;
+  //ypos1 = ypos1 * 7;
   printf("%f %f\n", xpos1, ypos1);
 }
