@@ -336,11 +336,14 @@ void processInput(GLFWwindow *window)
     getNormalizedCoords();
     T = glm::translate(glm::mat4(1), glm::vec3(xpos1, ypos1, 0));
     T = glm::mat4(-1) + T;
+    printf("mvp\n");
+    std::cout << highlight.MVP << std::endl;
     highlight.MVP = highlight.MVP - p;
     p = T;
     printf("trans\n");
     std::cout << T << std::endl;
     printf("mvp\n");
+    std::cout << highlight.MVP[1][3] << " " << highlight.MVP[0][3] << std::endl;
     std::cout << highlight.MVP << std::endl;
     highlight.MVP = highlight.MVP + T;
     printf("mvp\n");
@@ -471,7 +474,7 @@ void resize(int s)
   std::cout << highlight.MVP << std::endl;
   highlight.Model = Model;
   highlight.view = view;
-
+  p=glm::make_mat4(position);
   highlight.MVP = glm::mat4(1.0f) * glm::lookAt(glm::vec3(0, 0, 0.5), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)) * glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f) *glm::scale(glm::mat4(1), glm::vec3(2, 2, 2));
    printf("deps\n");
   std::cout << highlight.MVP << std::endl;
