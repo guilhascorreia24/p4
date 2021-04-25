@@ -292,7 +292,9 @@ void processInput(GLFWwindow *window)
 {
   if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
   {
-    highlight.MVP = S * highlight.MVP;
+    glm::mat4 T = glm::mat4(0.5f);
+    T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.5f));
+    highlight.MVP = highlight.MVP * S;
     printf("s\n");
     std::cout << S << std::endl;
     printf("mvp\n");
@@ -300,7 +302,9 @@ void processInput(GLFWwindow *window)
   }
   if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
   {
-    highlight.MVP = inverse(S) * highlight.MVP;
+    glm::mat4 T = glm::mat4(0.5f);
+    T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.5f));
+    highlight.MVP =  highlight.MVP * inverse(S);
     printf("s\n");
     std::cout << inverse(S) << std::endl;
     printf("mvp\n");
