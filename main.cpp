@@ -290,26 +290,6 @@ int main()
 
 void processInput(GLFWwindow *window)
 {
-  if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
-  {
-    glm::mat4 T = glm::mat4(0.5f);
-    T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.5f));
-    highlight.MVP = highlight.MVP * S;
-    printf("s\n");
-    std::cout << S << std::endl;
-    printf("mvp\n");
-    std::cout << highlight.MVP << std::endl;
-  }
-  if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
-  {
-    glm::mat4 T = glm::mat4(0.5f);
-    T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.5f));
-    highlight.MVP =  highlight.MVP * inverse(S);
-    printf("s\n");
-    std::cout << inverse(S) << std::endl;
-    printf("mvp\n");
-    std::cout << highlight.MVP << std::endl;
-  }
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
   {
     R = glm::mat4(1.0f);
@@ -365,6 +345,24 @@ void processInput(GLFWwindow *window)
     highlight.MVP = highlight.MVP + T;
     printf("mvp\n");
     std::cout << highlight.MVP << std::endl;
+      if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) {
+        glm::mat4 T1 = glm::mat4(1.0f);
+        T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, 0.5f));
+        highlight.MVP = highlight.MVP * S * inverse(T1);
+        printf("s\n");
+        std::cout << S << std::endl;
+        printf("mvp\n");
+        std::cout << highlight.MVP << std::endl;
+      }
+      if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS) {
+        glm::mat4 T2 = glm::mat4(1.0f);
+        T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.5f));
+        highlight.MVP = highlight.MVP * inverse(S) * T2 ;
+        printf("s\n");
+        std::cout << inverse(S) << std::endl;
+        printf("mvp\n");
+        std::cout << highlight.MVP << std::endl;
+      }
   }
 
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
