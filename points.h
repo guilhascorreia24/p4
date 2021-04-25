@@ -15824,3 +15824,13 @@ float *resize_letter(float *l,int size,float scale){
     }
     return resized;
 }
+float *convert_to_arr_float(Point *p,int size){
+    float *values=(float *)malloc(3*size*sizeof(float));
+    int v=0;
+    for(int i=0;i<size;i++){
+        values[v++]=p[i].x;
+        values[v++]=p[i].y;
+        values[v++]=p[i].z;
+    }
+    return values;
+}

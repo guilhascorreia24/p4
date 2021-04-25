@@ -220,7 +220,7 @@ int main()
   all_letters.Model = Model;
   all_letters.view = view;
   MVP = Projection * view * Model;
-  glfwSetMouseButtonCallback(window, mouseButtonCallback);
+  //glfwSetMouseButtonCallback(window, mouseButtonCallback);
   while (!glfwWindowShouldClose(window))
   {
     processInput(window);
