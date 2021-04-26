@@ -1,6 +1,6 @@
 float *colors_omega()
 {
-    float colors[5118*3];
+    float *colors=(float *)malloc(5118*3*sizeof(float));
     float max = 1, min = 0.0;
     float color = ((max - min) * ((float)rand() / RAND_MAX)) + min;
     for (int k = 0; k < 5119*3; k++)
@@ -23,7 +23,7 @@ float *colors_omega()
 }
 float *colors_P()
 {
-    float colors[3410];
+    float *colors=(float *)malloc(3410*sizeof(float));
 
     //Generate random colors
     for (int i = 0; i < 3411; i++)
@@ -35,8 +35,7 @@ float *colors_P()
 }
 float *color_R()
 {
-
-    static float colors[3662];
+	float *colors=(float *)malloc(3662*sizeof(float));
 
     //Generate random colors
     for (int i = 0; i < 3663; i++)
@@ -44,7 +43,8 @@ float *color_R()
     return colors;
 }
 float *colors_C(){
-    static const float colors[] = {
+	float *colors=(float *)malloc(2292*sizeof(float));
+    float colors2[] = {
 	0.7882f, 0.7917f, 0.9608f, 
 	0.6071f, 0.2812f, 0.6992f, 
 	0.5097f, 0.3279f, 0.7945f, 
@@ -810,11 +810,14 @@ float *colors_C(){
 	0.1822f, 0.4613f, 0.8099f, 
 	0.2648f, 0.7555f, 0.9145f, 
 	};
-    return colors;
+	for(int i=0;i<2292;i++){
+		colors[i]=colors2[i]; 
+	}
+	return colors;
 }
 float *colors_Psi(){
     int totalVertices=2646;
-	float colors[totalVertices];
+	float *colors=(float *)malloc(totalVertices*3*sizeof(float));
 	for (int i = 0; i < totalVertices; i += 3)
 	{
 		colors[i + 0] = ((double)rand() / (RAND_MAX));
@@ -826,7 +829,7 @@ float *colors_Psi(){
 float *colors_G(){
     	const int totalVertices = 2220 / 3 ;
 
-	float colors[totalVertices * 3];
+	float *colors=(float *)malloc(totalVertices * 3*sizeof(float));
 
 	for (int i = 0; i < totalVertices * 3; i += 6)
 	{
