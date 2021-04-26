@@ -10,7 +10,7 @@
 #include <glm/gtx/io.hpp>
 glm::mat4 MVP, R, S, T;
 float angle = 70.0f;
-float t=1;
+float t = 1;
 const glm::mat4 Projection = glm::perspective(glm::radians(angle), 900.0f / 900.0f, 0.1f, 200.0f);
 const glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 const int SCR_WIDTH = 900;
@@ -34,6 +34,7 @@ struct Letter
     int n_points;
     glm::mat4 MVP;
     glm::mat4 inicial_pos;
+    bool actions = false;
 };
 
 struct Letter *the_letter;
@@ -98,7 +99,7 @@ int main()
 
     unsigned int VAO[6];
     unsigned int VBO[6];
-    unsigned int EBO;
+    unsigned int EBO[6];
 
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -159,9 +160,9 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-                unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
+        unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
         processInput(window);
-    
+
         glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgram);
@@ -177,10 +178,12 @@ int main()
             printf("%i %d\n", i, the_letter[i].n_points);
             glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), convert_to_arr_float(the_letter[i].letter, the_letter[i].n_points), GL_STATIC_DRAW);
         }
-
-        glGenBuffers(1, &EBO);
-        glBindBuffer(GL_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
+        for (int i = 0; i < 6; i++)
+        {
+            glGenBuffers(1, &EBO[i]);
+            glBindBuffer(GL_ARRAY_BUFFER, EBO[i]);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
+        }
 
         for (int i = 0; i < 6; i++)
         {
@@ -221,45 +224,55 @@ void processInput(GLFWwindow *window)
     rotation(window, letter);
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && letter != -1)
     {
+        if (!the_letter[letter].actions)
+        {
+            the_letter[letter].actions = true;
+            the_letter[letter].MVP = glm::mat4(1);
+            T = glm::translate(T, glm::vec3((-5.5) + (letter * 2.2), 0.0f, 0.0f));
+            the_letter[letter].MVP = glm::mat4(1.0f) * glm::lookAt(glm::vec3(0, 0, 0.5), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)) * glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f) * T;
+        }
         translation(window, letter);
     }
 }
 void selection(GLFWwindow *window)
 {
+    float pos = -5.5;
+    T = glm::mat4(1.0f);
     if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
     {
-        positioned_default = false;
         letter = 0;
     }
     if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
     {
-        positioned_default = false;
         letter = 1;
     }
     if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
     {
-        positioned_default = false;
         letter = 2;
     }
     if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
     {
-        positioned_default = false;
         letter = 3;
     }
     if (glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS)
     {
-        positioned_default = false;
         letter = 4;
     }
     if (glfwGetKey(window, GLFW_KEY_F6) == GLFW_PRESS)
     {
-        positioned_default = false;
         letter = 5;
     }
 }
 
 void rotation(GLFWwindow *window, int s)
 {
+    if (!the_letter[s].actions && (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS))
+    {
+        the_letter[s].actions = true;
+        the_letter[letter].MVP = glm::mat4(1);
+        T = glm::translate(T, glm::vec3((-5.5) + (letter * 2.2), 0.0f, 0.0f));
+        the_letter[letter].MVP = glm::mat4(1.0f) * glm::lookAt(glm::vec3(0, 0, 0.5), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)) * glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f) * T;
+    }
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         positioned_default = false;
@@ -350,13 +363,15 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 }
 void reset()
 {
-    for(int i=0;i<6;i++){
-    float position[16] = {
+    for (int i = 0; i < 6; i++)
+    {
+        float position[16] = {
             the_letter[i].inicial_pos[0][0], the_letter[i].inicial_pos[0][1], the_letter[i].inicial_pos[0][2], the_letter[i].inicial_pos[0][3],
             the_letter[i].inicial_pos[1][0], the_letter[i].inicial_pos[1][1], the_letter[i].inicial_pos[1][2], the_letter[i].inicial_pos[1][3],
             the_letter[i].inicial_pos[2][0], the_letter[i].inicial_pos[2][1], the_letter[i].inicial_pos[2][2], the_letter[i].inicial_pos[2][3],
             the_letter[i].inicial_pos[3][0], the_letter[i].inicial_pos[3][1], the_letter[i].inicial_pos[3][2], the_letter[i].inicial_pos[3][3]};
-    the_letter[i].MVP=glm::make_mat4(position);
+        the_letter[i].MVP = glm::make_mat4(position);
+        the_letter[i].actions = false;
     }
 }
 void positions()
@@ -374,7 +389,7 @@ void positions()
             the_letter[i].MVP[2][0], the_letter[i].MVP[2][1], the_letter[i].MVP[2][2], the_letter[i].MVP[2][3],
             the_letter[i].MVP[3][0], the_letter[i].MVP[3][1], the_letter[i].MVP[3][2], the_letter[i].MVP[3][3]};
         pos += dist;
-        the_letter[i].inicial_pos=glm::make_mat4(position);
+        the_letter[i].inicial_pos = glm::make_mat4(position);
         std::cout << the_letter[i].MVP << std::endl;
         //std::cout << the_letter[i].inicial_pos << std::endl;
     }
@@ -396,8 +411,8 @@ void getNormalizedCoords()
 {
     xpos1 = (-1.0) + ((2.0f * xpos) / (SCR_WIDTH));
     ypos1 = (1.0) + ((-2.0f * ypos) / (SCR_HEIGHT));
-    xpos1 = xpos1 * 7 * glm::radians(angle);
-    ypos1 = ypos1 * 7 * glm::radians(angle);
+    xpos1 = xpos1; //* glm::radians(angle);
+    ypos1 = ypos1; //* glm::radians(angle);
     //printf("%f %f\n", xpos1, ypos1);
 }
 
