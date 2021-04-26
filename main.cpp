@@ -213,8 +213,8 @@ int main()
   //rotation
   R = glm::mat4(1.0f);
   //R = glm::rotate(R, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-  Projection = glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f);
-  view = glm::lookAt(glm::vec3(0, 0, 7), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+  Projection = glm::perspective(glm::radians(70.0f), 900.0f / 900.0f, 0.1f, 200.0f);
+  view = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
   Model = glm::mat4(1.0f);
   all_letters.MVP = Projection * view * Model;
   all_letters.Model = Model;
@@ -351,7 +351,7 @@ void processInput(GLFWwindow *window)
       if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) {
         glm::mat4 T1 = glm::mat4(1.0f);
         T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, 0.5f));
-        highlight.MVP = highlight.MVP * S * inverse(T1);
+        highlight.MVP = highlight.MVP *S;
         printf("s\n");
         std::cout << S << std::endl;
         printf("mvp\n");
@@ -360,7 +360,7 @@ void processInput(GLFWwindow *window)
       if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS) {
         glm::mat4 T2 = glm::mat4(1.0f);
         T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.5f));
-        highlight.MVP = highlight.MVP * inverse(S) * T2 ;
+        highlight.MVP = highlight.MVP *inverse(S);
         printf("s\n");
         std::cout << inverse(S) << std::endl;
         printf("mvp\n");
