@@ -32,7 +32,7 @@ int values = 0;
 int point_color = 0;
 float all_letters_coordinates[100000];
 float color[100000];
-bool positioned_default=false;
+bool positioned_default = false;
 float radius = 10.0f;
 float camX = radius;
 float camZ = radius;
@@ -156,8 +156,8 @@ int main()
 
     //rotation
     R = glm::mat4(1.0f);
-    //R = glm::rotate(R, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    Projection = glm::perspective(glm::radians(90.0f), 900.0f / 800.0f, 1.0f, 100.0f);
+
+    Projection = glm::perspective(glm::radians(90.0f), 900.0f / 900.0f, 1.0f, 10.0f);
     view = glm::lookAt(glm::vec3(0, 0, 7), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
     Model = glm::mat4(1.0f);
     MVP = Projection * view * Model;
@@ -217,11 +217,11 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
         reset();
-                letter = -1;
+        letter = -1;
     }
     selection(window);
     rotation(window, letter);
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && letter!=-1)
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && letter != -1)
     {
         translation(window, letter);
     }
@@ -230,32 +230,32 @@ void selection(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         letter = 0;
     }
     if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         letter = 1;
     }
     if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         letter = 2;
     }
     if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         letter = 3;
     }
     if (glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         letter = 4;
     }
     if (glfwGetKey(window, GLFW_KEY_F6) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         letter = 5;
     }
 }
@@ -264,7 +264,7 @@ void rotation(GLFWwindow *window, int s)
 {
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(radius), glm::vec3(1, 0, 0));
         printf("rotate\n");
@@ -275,7 +275,7 @@ void rotation(GLFWwindow *window, int s)
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(-radius), glm::vec3(1, 0, 0));
         printf("rotate\n");
@@ -286,7 +286,7 @@ void rotation(GLFWwindow *window, int s)
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(-radius), glm::vec3(0, 1, 0));
         printf("rotate\n");
@@ -297,7 +297,7 @@ void rotation(GLFWwindow *window, int s)
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(radius), glm::vec3(0, 1, 0));
         printf("rotate\n");
@@ -309,17 +309,24 @@ void rotation(GLFWwindow *window, int s)
 }
 void translation(GLFWwindow *window, int s)
 {
-        positioned_default=false;
+    positioned_default = false;
     glfwGetCursorPos(window, &xpos, &ypos);
     getNormalizedCoords();
     T = glm::translate(glm::mat4(1), glm::vec3(xpos1, ypos1, 0));
     T = glm::mat4(-1) + T;
     the_letter[s].MVP = the_letter[s].MVP - p;
     p = T;
+    float last_collum[16] = {0, 0, 0, 0,
+                             0, 0, 0, 0,
+                             0, 0, 0, 0,
+                             0, 0, 0, 1};
+    glm::mat4 last_col = glm::make_mat4(last_collum);
     printf("trans\n");
     std::cout << T << std::endl;
     printf("mvp\n");
     std::cout << the_letter[s].MVP << std::endl;
+    last_col = the_letter[s].MVP * last_col;
+    std::cout << last_col << std::endl;
     the_letter[s].MVP = the_letter[s].MVP + T;
     printf("mvp\n");
     std::cout << the_letter[s].MVP << std::endl;
@@ -329,7 +336,7 @@ void zoom(GLFWwindow *window, int s)
 {
     if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
     {
-            positioned_default=false;
+        positioned_default = false;
         glm::mat4 T1 = glm::mat4(1.0f);
         T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, 0.5f));
         the_letter[s].MVP = the_letter[s].MVP * S * inverse(T1);
@@ -340,7 +347,7 @@ void zoom(GLFWwindow *window, int s)
     }
     if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
     {
-        positioned_default=false;
+        positioned_default = false;
         glm::mat4 T2 = glm::mat4(1.0f);
         T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.5f));
         the_letter[s].MVP = the_letter[s].MVP * inverse(S) * T2;
@@ -388,44 +395,45 @@ void getNormalizedCoords()
 {
     xpos1 = (-1.0) + ((2.0f * xpos) / (SCR_WIDTH));
     ypos1 = (1.0) + ((-2.0f * ypos) / (SCR_HEIGHT));
-    xpos1=xpos1*24;
-    ypos1=ypos1*24;
+    xpos1 = xpos1 * 7;
+    ypos1 = ypos1 * 7;
     printf("%f %f\n", xpos1, ypos1);
 }
 
 void letters_lined(int s)
 {
-    p=glm::make_mat4(position);
-    the_letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
-    float n[] = {-5.5, -3.2, -0.5, 1.5, 3.6, 5.5};
-    the_letter[0].letter = letra_psy();
-    the_letter[0].n_points = size_psi / 3;
-    printf("psi:%d\n", the_letter[0].n_points);
-    the_letter[1].letter = letra_omega();
-    the_letter[1].n_points = size_omega / 3;
-    printf("psi:%d\n", the_letter[1].n_points);
-    the_letter[2].letter = letra_bruno();
-    the_letter[2].n_points = size_c / 3;
-    printf("psi:%d\n", the_letter[2].n_points);
-    the_letter[3].letter = letra_rafa();
-    the_letter[3].n_points = size_r / 3;
-    printf("psi:%d\n", the_letter[3].n_points);
-    the_letter[4].letter = letra_P();
-    the_letter[4].n_points = size_p / 3;
-    printf("psi:%d\n", the_letter[4].n_points);
-    the_letter[5].letter = letra_goncalo();
-    the_letter[5].n_points = size_g / 3;
-    printf("psi:%d\n", the_letter[5].n_points);
-    Projection = glm::perspective(glm::radians(90.0f), 900.0f / 800.0f, 1.0f, 100.0f);
-    view = glm::lookAt(glm::vec3(0, 0, 7), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-    Model = glm::mat4(1.0f);
-    for (int i = 0; i < 6; i++)
+    if (!positioned_default)
     {
-        the_letter[i].MVP=glm::mat4(1);
-        the_letter[i].MVP = Projection * view * Model;
-    }
-    if(!positioned_default){
+        p = glm::make_mat4(position);
+        free(the_letter);
+        the_letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
+        the_letter[0].letter = letra_psy();
+        the_letter[0].n_points = size_psi / 3;
+        printf("psi:%d\n", the_letter[0].n_points);
+        the_letter[1].letter = letra_omega();
+        the_letter[1].n_points = size_omega / 3;
+        printf("omega:%d\n", the_letter[1].n_points);
+        the_letter[2].letter = letra_bruno();
+        the_letter[2].n_points = size_c / 3;
+        printf("c:%d\n", the_letter[2].n_points);
+        the_letter[3].letter = letra_rafa();
+        the_letter[3].n_points = size_r / 3;
+        printf("R:%d\n", the_letter[3].n_points);
+        the_letter[4].letter = letra_P();
+        the_letter[4].n_points = size_p / 3;
+        printf("P:%d\n", the_letter[4].n_points);
+        the_letter[5].letter = letra_goncalo();
+        the_letter[5].n_points = size_g / 3;
+        printf("G:%d\n", the_letter[5].n_points);
+        Projection = glm::perspective(glm::radians(75.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+        view = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        Model = glm::mat4(1.0f);
+        for (int i = 0; i < 6; i++)
+        {
+            //the_letter[i].MVP = glm::mat4(1);
+            the_letter[i].MVP = Projection * view;
+        }
         positions(s);
-        positioned_default=true;
+        positioned_default = true;
     }
 }
