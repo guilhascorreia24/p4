@@ -175,7 +175,7 @@ int main()
 
             glGenBuffers(1, &VBO[i]);
             glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
-            printf("%i %d\n", i, the_letter[i].n_points);
+           // printf("%i %d\n", i, the_letter[i].n_points);
             glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), convert_to_arr_float(the_letter[i].letter, the_letter[i].n_points), GL_STATIC_DRAW);
         }
         for (int i = 0; i < 6; i++)

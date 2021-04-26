@@ -837,4 +837,5 @@ float *colors_G(){
 		colors[i + 4] = (0.5f);
 		colors[i + 5] = (0.0f);
 	}
+    return colors;
 }
