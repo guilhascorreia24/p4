@@ -7,6 +7,9 @@ exite 2 objectos com 2 matrizes
 - cada objecto tem o numero total de pontos, MVP e o conjunto de letras  
 - cada letra tem o numero de total de pontos, pontos(deixo de ser so floats atoa), e uma translaçao serve para posiciona-la no ecra inicial/reset  
 - nova funçao no points.h, serve para organizar por pontos  
+- New.cpp funciona tal igual como main.cpp
+- S falta cores
+
 
 
 
