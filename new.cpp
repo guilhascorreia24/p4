@@ -10,9 +10,9 @@
 #include <glm/gtx/io.hpp>
 glm::mat4 MVP, R, S, T;
 float angle = 70.0f;
+float t=1;
 const glm::mat4 Projection = glm::perspective(glm::radians(angle), 900.0f / 900.0f, 0.1f, 200.0f);
 const glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-const glm::mat4 Model = glm::mat4(1);
 const int SCR_WIDTH = 900;
 const int SCR_HEIGHT = 600;
 bool colored = false;
@@ -46,7 +46,7 @@ void positions(struct Letter *letter, float *positions_x, float positions_y, int
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 void getNormalizedCoords();
 void selection(GLFWwindow *window);
-void letters_lined(int s);
+void letters_lined();
 void rotation(GLFWwindow *window, int selected);
 void translation(GLFWwindow *window, int selected);
 void zoom(GLFWwindow *window, int selected);
@@ -143,7 +143,7 @@ int main()
     glDeleteShader(fragmentShader);
     //scaling
     S = glm::mat4(1.0f);
-    //S = glm::scale(S, glm::vec3(0.2f, 0.2f, 0.2f));
+    S = glm::scale(S, glm::vec3(0.9f, 0.9f, 0.9f));
 
     //translation
     T = glm::mat4(1.0f);
@@ -152,20 +152,20 @@ int main()
     //rotation
     R = glm::mat4(1.0f);
 
-    reset();
+    letters_lined();
     //reset();
     //reset();
     //reset();
 
     while (!glfwWindowShouldClose(window))
     {
+                unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
         processInput(window);
-
+    
         glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgram);
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (int i = 0; i < 6; i++)
         {
@@ -174,7 +174,7 @@ int main()
 
             glGenBuffers(1, &VBO[i]);
             glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
-            //printf("%i %d\n", i, the_letter[i].n_points);
+            printf("%i %d\n", i, the_letter[i].n_points);
             glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), convert_to_arr_float(the_letter[i].letter, the_letter[i].n_points), GL_STATIC_DRAW);
         }
 
@@ -191,7 +191,7 @@ int main()
             //std::cout << the_letter[i].MVP << std::endl;
             glEnableVertexAttribArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
             glDrawArrays(GL_TRIANGLES, 0, the_letter[i].n_points);
         }
         glEnable(GL_DEPTH_TEST);
@@ -312,15 +312,10 @@ void translation(GLFWwindow *window, int s)
     getNormalizedCoords();
     T = glm::translate(glm::mat4(1), glm::vec3(xpos1, ypos1, 0));
     T = glm::mat4(-1) + T;
-    the_letter[s].MVP = the_letter[s].MVP - the_letter[s].inicial_pos;
-    the_letter[s].inicial_pos = T;
-    printf("trans\n");
-    //std::cout << T << std::endl;
     printf("mvpp\n");
-    //std::cout << the_letter[s].MVP << std::endl;
-    the_letter[s].MVP = the_letter[s].MVP + T;
-    printf("mvp\n");
-    //std::cout << the_letter[s].MVP << std::endl;
+    std::cout << the_letter[s].MVP[3][0] << std::endl;
+    the_letter[s].MVP[3][0] = T[3][0];
+    the_letter[s].MVP[3][1] = T[3][1];
     zoom(window, s);
 }
 void zoom(GLFWwindow *window, int s)
@@ -329,7 +324,7 @@ void zoom(GLFWwindow *window, int s)
     {
         positioned_default = false;
         glm::mat4 T1 = glm::mat4(1.0f);
-        T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, 0.5f));
+        T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, 0.1f));
         the_letter[s].MVP = the_letter[s].MVP * S * inverse(T1);
         printf("s\n");
         //std::cout << S << std::endl;
@@ -340,7 +335,7 @@ void zoom(GLFWwindow *window, int s)
     {
         positioned_default = false;
         glm::mat4 T2 = glm::mat4(1.0f);
-        T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.5f));
+        T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.1f));
         the_letter[s].MVP = the_letter[s].MVP * inverse(S) * T2;
         printf("s\n");
         //std::cout << inverse(S) << std::endl;
@@ -355,9 +350,16 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 }
 void reset()
 {
-    letters_lined(-1);
+    for(int i=0;i<6;i++){
+    float position[16] = {
+            the_letter[i].inicial_pos[0][0], the_letter[i].inicial_pos[0][1], the_letter[i].inicial_pos[0][2], the_letter[i].inicial_pos[0][3],
+            the_letter[i].inicial_pos[1][0], the_letter[i].inicial_pos[1][1], the_letter[i].inicial_pos[1][2], the_letter[i].inicial_pos[1][3],
+            the_letter[i].inicial_pos[2][0], the_letter[i].inicial_pos[2][1], the_letter[i].inicial_pos[2][2], the_letter[i].inicial_pos[2][3],
+            the_letter[i].inicial_pos[3][0], the_letter[i].inicial_pos[3][1], the_letter[i].inicial_pos[3][2], the_letter[i].inicial_pos[3][3]};
+    the_letter[i].MVP=glm::make_mat4(position);
+    }
 }
-void positions(int trans)
+void positions()
 {
     float pos = -5.5;
     float dist = 2.2;
@@ -367,13 +369,13 @@ void positions(int trans)
         T = glm::translate(T, glm::vec3(pos, 0.0f, 0.0f));
         the_letter[i].MVP = the_letter[i].MVP * T;
         float position[16] = {
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            pos * (1.303f), 0, 0, 0};
+            the_letter[i].MVP[0][0], the_letter[i].MVP[0][1], the_letter[i].MVP[0][2], the_letter[i].MVP[0][3],
+            the_letter[i].MVP[1][0], the_letter[i].MVP[1][1], the_letter[i].MVP[1][2], the_letter[i].MVP[1][3],
+            the_letter[i].MVP[2][0], the_letter[i].MVP[2][1], the_letter[i].MVP[2][2], the_letter[i].MVP[2][3],
+            the_letter[i].MVP[3][0], the_letter[i].MVP[3][1], the_letter[i].MVP[3][2], the_letter[i].MVP[3][3]};
         pos += dist;
-        the_letter[i].inicial_pos = glm::make_mat4(position);
-        //std::cout << the_letter[i].MVP << std::endl;
+        the_letter[i].inicial_pos=glm::make_mat4(position);
+        std::cout << the_letter[i].MVP << std::endl;
         //std::cout << the_letter[i].inicial_pos << std::endl;
     }
 }
@@ -399,7 +401,7 @@ void getNormalizedCoords()
     //printf("%f %f\n", xpos1, ypos1);
 }
 
-void letters_lined(int s)
+void letters_lined()
 {
     the_letter = (struct Letter *)malloc(6 * sizeof(struct Letter));
     the_letter[0].letter = letra_psy();
@@ -416,8 +418,8 @@ void letters_lined(int s)
     the_letter[5].n_points = size_g / 3;
     for (int i = 0; i < 6; i++)
     {
-        std::cout << the_letter[i].MVP << std::endl;
-        the_letter[i].MVP = Projection * view * Model;
+        //std::cout << the_letter[i].MVP << std::endl;
+        the_letter[i].MVP = Projection * view * glm::mat4(1);
     }
-    positions(s);
+    positions();
 }

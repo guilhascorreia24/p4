@@ -15824,7 +15824,7 @@ float *resize_letter(float *l,int size,float scale){
     }
     return resized;
 }
-float *convert_to_arr_float(Point *p,int size){
+float *convert_to_arr_float(struct Point *p,int size){
     float *values=(float *)malloc(3*size*sizeof(float));
     int v=0;
     for(int i=0;i<size;i++){
