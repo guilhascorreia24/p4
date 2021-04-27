@@ -36,6 +36,7 @@ struct Letter
     glm::mat4 MVP;
     glm::mat4 inicial_pos;
     bool actions = false;
+    float *color;
 };
 
 struct Letter *the_letter;
@@ -52,6 +53,7 @@ void letters_lined();
 void rotation(GLFWwindow *window, int selected);
 void translation(GLFWwindow *window, int selected);
 void zoom(GLFWwindow *window, int selected);
+void coloring(int s, float color);
 
 const char *vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
@@ -158,6 +160,24 @@ int main()
     //reset();
     //reset();
     //reset();
+    for (int i = 0; i < 6; i++)
+    {
+        glGenVertexArrays(1, &VAO[i]);
+        glBindVertexArray(VAO[i]);
+
+        glGenBuffers(1, &VBO[i]);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
+        // printf("%i %d\n", i, the_letter[i].n_points);
+        glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), convert_to_arr_float(the_letter[i].letter, the_letter[i].n_points), GL_STATIC_DRAW);
+    }
+    for (int i = 0; i < 6; i++)
+    {
+        glGenBuffers(1, &EBO[i]);
+        glBindBuffer(GL_ARRAY_BUFFER, EBO[i]);
+        glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), the_letter[i].color, GL_STATIC_DRAW);
+    }
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
     bool p = true;
     while (!glfwWindowShouldClose(window))
     {
@@ -169,46 +189,24 @@ int main()
         glUseProgram(shaderProgram);
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        if (p)
-        {
-            for (int i = 0; i < 6; i++)
-            {
-                glGenVertexArrays(1, &VAO[i]);
-                glBindVertexArray(VAO[i]);
-
-                glGenBuffers(1, &VBO[i]);
-                glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
-                // printf("%i %d\n", i, the_letter[i].n_points);
-                glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), convert_to_arr_float(the_letter[i].letter, the_letter[i].n_points), GL_STATIC_DRAW);
-            }
-            glEnableVertexAttribArray(0);
-            //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-            p = false;
-        }
-        /*for (int i = 0; i < 6; i++)
-            {
-                glGenBuffers(1, &EBO[i]);
-                glBindBuffer(GL_ARRAY_BUFFER, EBO[i]);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
-            }*/
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
 
         for (int i = 0; i < 6; i++)
         {
-            //printf("ant\n");
-            //std::cout << the_letter[i].MVP << std::endl;
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &the_letter[i].MVP[0][0]); //////// matrix com as letras todas
-            //printf("dep\n");
-            //std::cout << the_letter[i].MVP << std::endl;
             glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
-                        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+            glBindBuffer(GL_ARRAY_BUFFER, EBO[i]);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
             glDrawArrays(GL_TRIANGLES, 0, the_letter[i].n_points);
         }
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
         glfwSwapBuffers(window);
         glfwPollEvents();
         //printf("velo:%f\n",radius);
     }
+    glBindVertexArray(0);
     for (int i = 0; i < 6; i++)
     {
         glDeleteVertexArrays(1, &VAO[i]);
@@ -247,6 +245,7 @@ void selection(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
     {
         letter = 0;
+        coloring(0, 1.0f);
     }
     if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
     {
@@ -443,4 +442,16 @@ void letters_lined()
         the_letter[i].MVP = Projection * view * glm::mat4(1);
     }
     positions();
+}
+void coloring(int s, float color)
+{
+    the_letter[s].color = (float *)malloc(the_letter[s].n_points * 3 * sizeof(float));
+    printf("%d\n", the_letter[s].n_points);
+    for (int i = 0; i < the_letter[s].n_points * 3; i += 3)
+    {
+        the_letter[s].color[i] = color;
+        the_letter[s].color[i + 1] = color;
+        the_letter[s].color[i + 2] = color;
+    }
+    printf("fim\n");
 }
