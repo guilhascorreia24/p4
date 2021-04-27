@@ -158,7 +158,7 @@ int main()
     //reset();
     //reset();
     //reset();
-
+    bool p = true;
     while (!glfwWindowShouldClose(window))
     {
         unsigned int MatrixID = glGetUniformLocation(shaderProgram, "MVP");
@@ -169,22 +169,28 @@ int main()
         glUseProgram(shaderProgram);
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int i = 0; i < 6; i++)
+        if (p)
         {
-            glGenVertexArrays(1, &VAO[i]);
-            glBindVertexArray(VAO[i]);
+            for (int i = 0; i < 6; i++)
+            {
+                glGenVertexArrays(1, &VAO[i]);
+                glBindVertexArray(VAO[i]);
 
-            glGenBuffers(1, &VBO[i]);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
-            // printf("%i %d\n", i, the_letter[i].n_points);
-            glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), convert_to_arr_float(the_letter[i].letter, the_letter[i].n_points), GL_STATIC_DRAW);
+                glGenBuffers(1, &VBO[i]);
+                glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
+                // printf("%i %d\n", i, the_letter[i].n_points);
+                glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), convert_to_arr_float(the_letter[i].letter, the_letter[i].n_points), GL_STATIC_DRAW);
+            }
+            glEnableVertexAttribArray(0);
+            //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+            p = false;
         }
-        for (int i = 0; i < 6; i++)
-        {
-            glGenBuffers(1, &EBO[i]);
-            glBindBuffer(GL_ARRAY_BUFFER, EBO[i]);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
-        }
+        /*for (int i = 0; i < 6; i++)
+            {
+                glGenBuffers(1, &EBO[i]);
+                glBindBuffer(GL_ARRAY_BUFFER, EBO[i]);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
+            }*/
 
         for (int i = 0; i < 6; i++)
         {
@@ -193,9 +199,8 @@ int main()
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &the_letter[i].MVP[0][0]); //////// matrix com as letras todas
             //printf("dep\n");
             //std::cout << the_letter[i].MVP << std::endl;
-            glEnableVertexAttribArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+                        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
             glDrawArrays(GL_TRIANGLES, 0, the_letter[i].n_points);
         }
         glEnable(GL_DEPTH_TEST);
@@ -342,7 +347,7 @@ void zoom(GLFWwindow *window, int s)
         the_letter[s].MVP = the_letter[s].MVP * S * inverse(T1);
         //printf("s\n");
         //std::cout << S << std::endl;
-       // printf("mvp\n");
+        // printf("mvp\n");
         //std::cout << the_letter[s].MVP << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
