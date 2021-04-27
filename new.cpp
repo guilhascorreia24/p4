@@ -22,6 +22,7 @@ float radius = 10.0f;
 double xpos, ypos;
 float xpos1, ypos1;
 bool lbutton_down;
+float zoom_pos = 0.5;
 glm::mat4 rotates = glm::mat4(1.0f);
 glm::mat4 identity = glm::mat4(1.0f);
 struct Letter
@@ -31,6 +32,8 @@ struct Letter
     glm::mat4 MVP;
     glm::mat4 inicial_pos;
     float *color;
+    float scale;
+    float position_z;
 };
 
 struct Letter *the_letter;
@@ -239,6 +242,7 @@ void selection(GLFWwindow *window)
     {
         letter = 0;
         coloring(letter);
+        //the_letter[0].MVP=the_letter[0].MVP*glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f);;
     }
     if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
     {
@@ -322,8 +326,17 @@ void zoom(GLFWwindow *window, int s)
     {
         positioned_default = false;
         glm::mat4 T1 = glm::mat4(1.0f);
-        T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, -0.5f));
-        the_letter[s].MVP = the_letter[s].MVP * S * T1;
+        T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, 0.5f));
+        the_letter[s].MVP = the_letter[s].MVP * S * inverse(T1);
+               the_letter[s].scale--;
+        if (the_letter[s].scale ==0)
+        {
+            the_letter[s].position_z = 0.0;
+        }
+
+        the_letter[s].MVP[3][2] = the_letter[s].position_z;
+        printf("-\n");
+        std::cout << the_letter[s].MVP << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
     {
@@ -331,6 +344,15 @@ void zoom(GLFWwindow *window, int s)
         glm::mat4 T2 = glm::mat4(1.0f);
         T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.5f));
         the_letter[s].MVP = the_letter[s].MVP * inverse(S) * T2;
+        the_letter[s].scale++;
+        if (the_letter[s].scale==0)
+        {
+            the_letter[s].position_z = -0.6;
+        }
+        the_letter[s].MVP[3][2] = the_letter[s].position_z;
+        printf("%f\n", the_letter[s].scale);
+        printf("+\n");
+        std::cout << the_letter[s].MVP << std::endl;
     }
 }
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -348,6 +370,9 @@ void reset()
             the_letter[i].inicial_pos[2][0], the_letter[i].inicial_pos[2][1], the_letter[i].inicial_pos[2][2], the_letter[i].inicial_pos[2][3],
             the_letter[i].inicial_pos[3][0], the_letter[i].inicial_pos[3][1], the_letter[i].inicial_pos[3][2], the_letter[i].inicial_pos[3][3]};
         the_letter[i].MVP = glm::make_mat4(position);
+        the_letter[i].scale = 0;
+        the_letter[i].position_z = -0.5;
+        
     }
     default_color();
 }
@@ -361,7 +386,7 @@ void positions()
         T = glm::mat4(1.0f);
         T = glm::translate(T, glm::vec3(pos, 0.0f, 0.0f));
         the_letter[i].MVP = the_letter[i].MVP * T;
-        the_letter[i].MVP[3][2]=-0.5;
+        the_letter[i].MVP[3][2] = -0.5;
         //the_letter[i].MVP[3][3]=1.0;
         float position[16] = {
             the_letter[i].MVP[0][0], the_letter[i].MVP[0][1], the_letter[i].MVP[0][2], the_letter[i].MVP[0][3],
@@ -414,7 +439,8 @@ void letters_lined()
     //Projection[3][3]=1;
     for (int i = 0; i < 6; i++)
     {
-        //std::cout << the_letter[i].MVP << std::endl;
+        the_letter[i].position_z = -0.5;
+        the_letter[i].scale=0;
         the_letter[i].MVP = Projection * view * glm::mat4(1);
     }
     positions();
@@ -437,7 +463,7 @@ void default_color()
             for (int i = 0; i < the_letter[s].n_points * 3; i += 3)
             {
                 the_letter[s].color[i] = 0.0f;
-                the_letter[s].color[i + 1] =0.0f;
+                the_letter[s].color[i + 1] = 0.0f;
                 the_letter[s].color[i + 2] = 0.0f;
             }
         }
