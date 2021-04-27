@@ -12,7 +12,7 @@
 glm::mat4 MVP, R, S, T;
 float angle = 70.0f;
 float t = 1;
-const glm::mat4 Projection = /*glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f);*/glm::perspective(glm::radians(angle), 900.0f / 900.0f, 0.1f, 100.0f);
+const glm::mat4 Projection = glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f);/*glm::perspective(glm::radians(angle), 900.0f / 900.0f, 0.1f, 100.0f);*/
 const glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 const int SCR_WIDTH = 900;
 const int SCR_HEIGHT = 600;
