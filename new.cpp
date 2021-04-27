@@ -12,16 +12,11 @@
 glm::mat4 MVP, R, S, T;
 float angle = 70.0f;
 float t = 1;
-const glm::mat4 Projection = glm::perspective(glm::radians(angle), 900.0f / 900.0f, 0.1f, 200.0f);
+const glm::mat4 Projection = /*glm::ortho(-7.0f, 7.0f, -7.0f, 7.0f, -100.0f, 100.0f);*/glm::perspective(glm::radians(angle), 900.0f / 900.0f, 0.1f, 100.0f);
 const glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 const int SCR_WIDTH = 900;
 const int SCR_HEIGHT = 600;
-bool colored = false;
 int letter = -1;
-int values = 0;
-int point_color = 0;
-float all_letters_coordinates[100000];
-float color[100000];
 bool positioned_default = false;
 float radius = 10.0f;
 double xpos, ypos;
@@ -53,7 +48,8 @@ void letters_lined();
 void rotation(GLFWwindow *window, int selected);
 void translation(GLFWwindow *window, int selected);
 void zoom(GLFWwindow *window, int selected);
-void coloring(int s, float color);
+void coloring(int s);
+void default_color();
 
 const char *vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
@@ -100,7 +96,7 @@ int main()
         return -1;
     }
 
-    unsigned int VAO[6];
+    unsigned int VAO;
     unsigned int VBO[6];
     unsigned int EBO[6];
 
@@ -147,7 +143,7 @@ int main()
     glDeleteShader(fragmentShader);
     //scaling
     S = glm::mat4(1.0f);
-    S = glm::scale(S, glm::vec3(0.9f, 0.9f, 0.9f));
+    S = glm::scale(S, glm::vec3(0.97f, 0.97f, 0.97f));
 
     //translation
     T = glm::mat4(1.0f);
@@ -160,24 +156,17 @@ int main()
     //reset();
     //reset();
     //reset();
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
     for (int i = 0; i < 6; i++)
     {
-        glGenVertexArrays(1, &VAO[i]);
-        glBindVertexArray(VAO[i]);
 
         glGenBuffers(1, &VBO[i]);
         glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
         // printf("%i %d\n", i, the_letter[i].n_points);
         glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), convert_to_arr_float(the_letter[i].letter, the_letter[i].n_points), GL_STATIC_DRAW);
     }
-    for (int i = 0; i < 6; i++)
-    {
-        glGenBuffers(1, &EBO[i]);
-        glBindBuffer(GL_ARRAY_BUFFER, EBO[i]);
-        glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), the_letter[i].color, GL_STATIC_DRAW);
-    }
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
     bool p = true;
     while (!glfwWindowShouldClose(window))
     {
@@ -187,11 +176,18 @@ int main()
         glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgram);
-        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        glBindVertexArray(VAO);
+        //int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
-
+        for (int i = 0; i < 6; i++)
+        {
+            glGenBuffers(1, &EBO[i]);
+            glBindBuffer(GL_ARRAY_BUFFER, EBO[i]);
+            glBufferData(GL_ARRAY_BUFFER, the_letter[i].n_points * 3 * sizeof(float), the_letter[i].color, GL_STATIC_DRAW);
+        }
+        glEnableVertexAttribArray(1);
         for (int i = 0; i < 6; i++)
         {
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &the_letter[i].MVP[0][0]); //////// matrix com as letras todas
@@ -202,14 +198,19 @@ int main()
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glDrawArrays(GL_TRIANGLES, 0, the_letter[i].n_points);
         }
+        for (int i = 0; i < 6; i++)
+        {
+            glDeleteBuffers(1, &EBO[i]);
+        }
         glfwSwapBuffers(window);
         glfwPollEvents();
         //printf("velo:%f\n",radius);
     }
     glBindVertexArray(0);
+    glDeleteVertexArrays(1, &VAO);
     for (int i = 0; i < 6; i++)
     {
-        glDeleteVertexArrays(1, &VAO[i]);
+
         glDeleteBuffers(1, &VBO[i]);
     }
     glDeleteProgram(shaderProgram);
@@ -245,28 +246,34 @@ void selection(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
     {
         letter = 0;
-        coloring(0, 1.0f);
+        coloring(letter);
     }
     if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
     {
         letter = 1;
+        coloring(letter);
     }
     if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
     {
         letter = 2;
+        coloring(letter);
     }
     if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
     {
         letter = 3;
+        coloring(letter);
     }
     if (glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS)
     {
         letter = 4;
+        coloring(letter);
     }
     if (glfwGetKey(window, GLFW_KEY_F6) == GLFW_PRESS)
     {
         letter = 5;
+        coloring(letter);
     }
+    default_color();
 }
 
 void rotation(GLFWwindow *window, int s)
@@ -322,6 +329,16 @@ void rotation(GLFWwindow *window, int s)
         //std::cout << the_letter[s].MVP << std::endl;
         the_letter[s].MVP = the_letter[s].MVP * R;
     }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        if (radius < 180.0f)
+            radius += 0.01f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+    {
+        if (radius > 0.0f)
+            radius -= 0.01f;
+    }
 }
 void translation(GLFWwindow *window, int s)
 {
@@ -342,23 +359,27 @@ void zoom(GLFWwindow *window, int s)
     {
         positioned_default = false;
         glm::mat4 T1 = glm::mat4(1.0f);
-        T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, 0.1f));
-        the_letter[s].MVP = the_letter[s].MVP * S * inverse(T1);
+        T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, -0.5f));
+        the_letter[s].MVP = the_letter[s].MVP * S * T1;
         //printf("s\n");
         //std::cout << S << std::endl;
-        // printf("mvp\n");
-        //std::cout << the_letter[s].MVP << std::endl;
+        printf("mvp\n");
+        std::cout << the_letter[s].MVP << std::endl;
+        printf("mvp0\n");
+        std::cout << the_letter[1].MVP << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
     {
         positioned_default = false;
         glm::mat4 T2 = glm::mat4(1.0f);
-        T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.1f));
+        T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.5f));
         the_letter[s].MVP = the_letter[s].MVP * inverse(S) * T2;
         //printf("s\n");
         //std::cout << inverse(S) << std::endl;
-        //printf("mvp\n");
-        //std::cout << the_letter[s].MVP << std::endl;
+        printf("mvp\n");
+        std::cout << the_letter[s].MVP << std::endl;
+        printf("mvp0\n");
+        std::cout << the_letter[1].MVP << std::endl;
     }
 }
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -378,6 +399,7 @@ void reset()
         the_letter[i].MVP = glm::make_mat4(position);
         the_letter[i].actions = false;
     }
+    default_color();
 }
 void positions()
 {
@@ -385,9 +407,12 @@ void positions()
     float dist = 2.2;
     for (int i = 0; i < 6; i++)
     {
+        the_letter[i].color = (float *)calloc(the_letter[i].n_points * 3, the_letter[i].n_points * 3 * sizeof(float));
         T = glm::mat4(1.0f);
         T = glm::translate(T, glm::vec3(pos, 0.0f, 0.0f));
         the_letter[i].MVP = the_letter[i].MVP * T;
+        the_letter[i].MVP[3][2]=-0.5;
+        //the_letter[i].MVP[3][3]=1.0;
         float position[16] = {
             the_letter[i].MVP[0][0], the_letter[i].MVP[0][1], the_letter[i].MVP[0][2], the_letter[i].MVP[0][3],
             the_letter[i].MVP[1][0], the_letter[i].MVP[1][1], the_letter[i].MVP[1][2], the_letter[i].MVP[1][3],
@@ -436,6 +461,7 @@ void letters_lined()
     the_letter[4].n_points = size_p / 3;
     the_letter[5].letter = letra_goncalo();
     the_letter[5].n_points = size_g / 3;
+    //Projection[3][3]=1;
     for (int i = 0; i < 6; i++)
     {
         //std::cout << the_letter[i].MVP << std::endl;
@@ -443,15 +469,27 @@ void letters_lined()
     }
     positions();
 }
-void coloring(int s, float color)
-{
-    the_letter[s].color = (float *)malloc(the_letter[s].n_points * 3 * sizeof(float));
-    printf("%d\n", the_letter[s].n_points);
+void coloring(int s)
+{ //printf("%d\n", the_letter[s].n_points);
     for (int i = 0; i < the_letter[s].n_points * 3; i += 3)
     {
-        the_letter[s].color[i] = color;
-        the_letter[s].color[i + 1] = color;
-        the_letter[s].color[i + 2] = color;
+        the_letter[s].color[i] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        the_letter[s].color[i + 1] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        the_letter[s].color[i + 2] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
     }
-    printf("fim\n");
+}
+void default_color()
+{
+    for (int s = 0; s < 6; s++)
+    {
+        if (letter != s)
+        {
+            for (int i = 0; i < the_letter[s].n_points * 3; i += 3)
+            {
+                the_letter[s].color[i] = 0.0f;
+                the_letter[s].color[i + 1] =0.0f;
+                the_letter[s].color[i + 2] = 0.0f;
+            }
+        }
+    }
 }
