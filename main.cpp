@@ -4,7 +4,6 @@
 #include <math.h>
 #include <iostream>
 #include "points.h"
-#include "colors.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -331,7 +330,7 @@ void zoom(GLFWwindow *window, int s)
                the_letter[s].scale--;
         if (the_letter[s].scale ==0)
         {
-            the_letter[s].position_z = 0.0;
+            the_letter[s].position_z = 0.9;
         }
 
         the_letter[s].MVP[3][2] = the_letter[s].position_z;
@@ -347,7 +346,7 @@ void zoom(GLFWwindow *window, int s)
         the_letter[s].scale++;
         if (the_letter[s].scale==0)
         {
-            the_letter[s].position_z = -0.6;
+            the_letter[s].position_z = -0.9;
         }
         the_letter[s].MVP[3][2] = the_letter[s].position_z;
         printf("%f\n", the_letter[s].scale);
@@ -386,7 +385,7 @@ void positions()
         T = glm::mat4(1.0f);
         T = glm::translate(T, glm::vec3(pos, 0.0f, 0.0f));
         the_letter[i].MVP = the_letter[i].MVP * T;
-        the_letter[i].MVP[3][2] = -0.5;
+        the_letter[i].MVP[3][2] = 0.0;
         //the_letter[i].MVP[3][3]=1.0;
         float position[16] = {
             the_letter[i].MVP[0][0], the_letter[i].MVP[0][1], the_letter[i].MVP[0][2], the_letter[i].MVP[0][3],
