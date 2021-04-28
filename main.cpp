@@ -329,30 +329,22 @@ void zoom(GLFWwindow *window, int s)
         positioned_default = false;
         if (the_letter[s].position_z < 0.95)
         {
-            glm::mat4 T1 = glm::mat4(1.0f);
-            T1 = glm::translate(T1, glm::vec3(0.0f, 0.0f, 0.5f));
-            the_letter[s].MVP = the_letter[s].MVP * S * inverse(T1);
+            the_letter[s].MVP = the_letter[s].MVP * S;
             the_letter[s].position_z += 0.01;
         }
 
         the_letter[s].MVP[3][2] = the_letter[s].position_z;
-        printf("-\n");
-        std::cout << the_letter[s].MVP << std::endl;
     }
+    
     if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
     {
         positioned_default = false;
         if (the_letter[s].position_z > -0.95)
         {
-            glm::mat4 T2 = glm::mat4(1.0f);
-            T2 = glm::translate(T2, glm::vec3(0.0f, 0.0f, 0.5f));
-            the_letter[s].MVP = the_letter[s].MVP * inverse(S) * T2;
+            the_letter[s].MVP = the_letter[s].MVP * inverse(S);
             the_letter[s].position_z -= 0.01;
         }
         the_letter[s].MVP[3][2] = the_letter[s].position_z;
-        printf("%f\n", the_letter[s].scale);
-        printf("+\n");
-        std::cout << the_letter[s].MVP << std::endl;
     }
 }
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
