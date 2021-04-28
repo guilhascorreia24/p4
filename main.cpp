@@ -32,7 +32,6 @@ struct Letter
     glm::mat4 MVP;
     glm::mat4 inicial_pos;
     float *color;
-    float scale;
     float position_z;
 };
 
@@ -155,9 +154,6 @@ int main()
     R = glm::mat4(1.0f);
 
     letters_lined();
-    //reset();
-    //reset();
-    //reset();
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
     for (int i = 0; i < 6; i++)
@@ -278,7 +274,7 @@ void selection(GLFWwindow *window)
 
 void onkeyrotationpress(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if ( key == GLFW_KEY_RIGHT && action==GLFW_PRESS)
+    if ( key == GLFW_KEY_UP && action==GLFW_PRESS)
     {
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(radius), glm::vec3(1, 0, 0));
@@ -319,11 +315,12 @@ void translation(GLFWwindow *window, int s)
     glfwGetCursorPos(window, &xpos, &ypos);
     getNormalizedCoords();
     T = glm::translate(glm::mat4(1), glm::vec3(xpos1, ypos1, 0));
-    T = glm::mat4(-1) + T;
+    //T = glm::mat4(-1) + T;
     the_letter[s].MVP[3][0] = T[3][0];
     the_letter[s].MVP[3][1] = T[3][1];
     zoom(window, s);
 }
+
 void zoom(GLFWwindow *window, int s)
 {
     if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
@@ -364,7 +361,6 @@ void reset()
             the_letter[i].inicial_pos[2][0], the_letter[i].inicial_pos[2][1], the_letter[i].inicial_pos[2][2], the_letter[i].inicial_pos[2][3],
             the_letter[i].inicial_pos[3][0], the_letter[i].inicial_pos[3][1], the_letter[i].inicial_pos[3][2], the_letter[i].inicial_pos[3][3]};
         the_letter[i].MVP = glm::make_mat4(position);
-        the_letter[i].scale = 0;
         the_letter[i].position_z = 0.0;
     }
     default_color();
@@ -429,11 +425,9 @@ void letters_lined()
     the_letter[4].n_points = size_p / 3;
     the_letter[5].letter = letra_goncalo();
     the_letter[5].n_points = size_g / 3;
-    //Projection[3][3]=1;
     for (int i = 0; i < 6; i++)
     {
         the_letter[i].position_z = 0;
-        the_letter[i].scale = 0;
         the_letter[i].MVP = Projection * view * glm::mat4(1);
     }
     positions();
