@@ -327,7 +327,7 @@ void zoom(GLFWwindow *window, int s)
     if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
     {
         positioned_default = false;
-        if (the_letter[s].position_z < 0.95)
+        if (the_letter[s].position_z < 0.93)
         {
             the_letter[s].MVP = the_letter[s].MVP * S;
             the_letter[s].position_z += 0.01;
@@ -339,7 +339,7 @@ void zoom(GLFWwindow *window, int s)
     if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
     {
         positioned_default = false;
-        if (the_letter[s].position_z > -0.95)
+        if (the_letter[s].position_z > -0.93)
         {
             the_letter[s].MVP = the_letter[s].MVP * inverse(S);
             the_letter[s].position_z -= 0.01;

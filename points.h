@@ -17,7 +17,12 @@ struct Point *convert(float *x,int size){
     for(int i=0;i<size;i+=3){
         points[p].x=x[i];
         points[p].y=x[i+1];
-        points[p].z=x[i+2];
+        if(x[i+2]>0){
+            points[p].z=0.15;
+        }else{
+            points[p].z=-0.15;
+        }
+        //points[p].z=x[i+2];
         //printf("%f %f %f\n",points[p].x,points[p].y,points[p].z);
         p++;
     }
