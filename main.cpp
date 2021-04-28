@@ -22,6 +22,7 @@ double xpos, ypos;
 float xpos1, ypos1;
 bool lbutton_down;
 float zoom_pos = 0.5;
+//GLFWkeyfun onkeyrotationpress;
 glm::mat4 rotates = glm::mat4(1.0f);
 glm::mat4 identity = glm::mat4(1.0f);
 struct Letter
@@ -46,7 +47,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 void getNormalizedCoords();
 void selection(GLFWwindow *window);
 void letters_lined();
-void rotation(GLFWwindow *window, int selected);
+void onkeyrotationpress(GLFWwindow* window, int key, int scancode, int action, int mods);
 void translation(GLFWwindow *window, int selected);
 void zoom(GLFWwindow *window, int selected);
 void coloring(int s);
@@ -233,7 +234,8 @@ void processInput(GLFWwindow *window)
     }
     else if (letter != -1)
     {
-        rotation(window, letter);
+        //rotation(window, letter);
+        glfwSetKeyCallback(window, onkeyrotationpress);
     }
 }
 void selection(GLFWwindow *window)
@@ -274,31 +276,31 @@ void selection(GLFWwindow *window)
     default_color();
 }
 
-void rotation(GLFWwindow *window, int s)
+void onkeyrotationpress(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if ( key == GLFW_KEY_RIGHT && action==GLFW_PRESS)
     {
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(radius), glm::vec3(1, 0, 0));
-        the_letter[s].MVP = the_letter[s].MVP * R;
+        the_letter[letter].MVP = the_letter[letter].MVP * R;
     }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if ( key == GLFW_KEY_DOWN && action==GLFW_PRESS)
     {
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(-radius), glm::vec3(1, 0, 0));
-        the_letter[s].MVP = the_letter[s].MVP * R;
+        the_letter[letter].MVP = the_letter[letter].MVP * R;
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    if (key == GLFW_KEY_LEFT && action==GLFW_PRESS)
     {
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(-radius), glm::vec3(0, 1, 0));
-        the_letter[s].MVP = the_letter[s].MVP * R;
+        the_letter[letter].MVP = the_letter[letter].MVP * R;
     }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    if (key == GLFW_KEY_RIGHT && action==GLFW_PRESS)
     {
         R = glm::mat4(1.0f);
         R = glm::rotate(R, glm::radians(radius), glm::vec3(0, 1, 0));
-        the_letter[s].MVP = the_letter[s].MVP * R;
+        the_letter[letter].MVP = the_letter[letter].MVP * R;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
