@@ -305,12 +305,12 @@ void onkeyrotationpress(GLFWwindow* window, int key, int scancode, int action, i
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
         if (radius < 180.0f)
-            radius += 0.01f;
+            radius += 5.0f;
     }
     if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
     {
         if (radius > 0.0f)
-            radius -= 0.01f;
+            radius -= 5.0f;
     }
 }
 void translation(GLFWwindow *window, int s)
