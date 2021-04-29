@@ -46,7 +46,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 void getNormalizedCoords();
 void selection(GLFWwindow *window);
 void letters_lined();
-void onkeyrotationpress(GLFWwindow* window, int key, int scancode, int action, int mods);
+void onkeyrotationpress(GLFWwindow *window, int key, int scancode, int action, int mods);
 void translation(GLFWwindow *window, int selected);
 void zoom(GLFWwindow *window, int selected);
 void coloring(int s);
@@ -272,41 +272,44 @@ void selection(GLFWwindow *window)
     default_color();
 }
 
-void onkeyrotationpress(GLFWwindow* window, int key, int scancode, int action, int mods)
+void onkeyrotationpress(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    if ( key == GLFW_KEY_UP && action==GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) != GLFW_PRESS && glfwGetKey(window, GLFW_KEY_KP_ADD) != GLFW_PRESS)
     {
-        R = glm::mat4(1.0f);
-        R = glm::rotate(R, glm::radians(radius), glm::vec3(1, 0, 0));
-        the_letter[letter].MVP = the_letter[letter].MVP * R;
-    }
-    if ( key == GLFW_KEY_DOWN && action==GLFW_PRESS)
-    {
-        R = glm::mat4(1.0f);
-        R = glm::rotate(R, glm::radians(-radius), glm::vec3(1, 0, 0));
-        the_letter[letter].MVP = the_letter[letter].MVP * R;
-    }
-    if (key == GLFW_KEY_LEFT && action==GLFW_PRESS)
-    {
-        R = glm::mat4(1.0f);
-        R = glm::rotate(R, glm::radians(-radius), glm::vec3(0, 1, 0));
-        the_letter[letter].MVP = the_letter[letter].MVP * R;
-    }
-    if (key == GLFW_KEY_RIGHT && action==GLFW_PRESS)
-    {
-        R = glm::mat4(1.0f);
-        R = glm::rotate(R, glm::radians(radius), glm::vec3(0, 1, 0));
-        the_letter[letter].MVP = the_letter[letter].MVP * R;
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        if (radius < 180.0f)
-            radius += 5.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-    {
-        if (radius > 0.0f)
-            radius -= 5.0f;
+        if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+        {
+            R = glm::mat4(1.0f);
+            R = glm::rotate(R, glm::radians(radius), glm::vec3(1, 0, 0));
+            the_letter[letter].MVP = the_letter[letter].MVP * R;
+        }
+        if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+        {
+            R = glm::mat4(1.0f);
+            R = glm::rotate(R, glm::radians(-radius), glm::vec3(1, 0, 0));
+            the_letter[letter].MVP = the_letter[letter].MVP * R;
+        }
+        if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+        {
+            R = glm::mat4(1.0f);
+            R = glm::rotate(R, glm::radians(-radius), glm::vec3(0, 1, 0));
+            the_letter[letter].MVP = the_letter[letter].MVP * R;
+        }
+        if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+        {
+            R = glm::mat4(1.0f);
+            R = glm::rotate(R, glm::radians(radius), glm::vec3(0, 1, 0));
+            the_letter[letter].MVP = the_letter[letter].MVP * R;
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        {
+            if (radius < 180.0f)
+                radius += 5.0f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        {
+            if (radius > 0.0f)
+                radius -= 5.0f;
+        }
     }
 }
 void translation(GLFWwindow *window, int s)
@@ -326,7 +329,7 @@ void zoom(GLFWwindow *window, int s)
     if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
     {
         positioned_default = false;
-        if (the_letter[s].position_z < 0.93)
+        if (the_letter[s].position_z < 0.92)
         {
             the_letter[s].MVP = the_letter[s].MVP * S;
             the_letter[s].position_z += 0.01;
@@ -334,11 +337,11 @@ void zoom(GLFWwindow *window, int s)
 
         the_letter[s].MVP[3][2] = the_letter[s].position_z;
     }
-    
+
     if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
     {
         positioned_default = false;
-        if (the_letter[s].position_z > -0.93)
+        if (the_letter[s].position_z > -0.92)
         {
             the_letter[s].MVP = the_letter[s].MVP * inverse(S);
             the_letter[s].position_z -= 0.01;
