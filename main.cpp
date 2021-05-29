@@ -148,7 +148,7 @@ int main()
 
     //translation
     T = glm::mat4(1.0f);
-    //T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.0f));
+    T = glm::translate(T, glm::vec3(0.0f, 0.0f, 0.0f));
 
     //rotation
     R = glm::mat4(1.0f);
